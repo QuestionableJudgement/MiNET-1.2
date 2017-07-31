@@ -45,22 +45,23 @@ namespace MiNET.Net
 	{
 		private static readonly ILog Log = LogManager.GetLogger(typeof (Package));
 
-		private bool _isEncoded = false;
+		private bool _isEncoded;
 		private byte[] _encodedMessage;
 
-		[JsonIgnore] public int DatagramSequenceNumber = 0;
+		[JsonIgnore] public int DatagramSequenceNumber;
 
 		[JsonIgnore]
 		public bool NoBatch { get; set; }
 
 		[JsonIgnore] public Reliability Reliability = Reliability.Unreliable;
-		[JsonIgnore] public int ReliableMessageNumber = 0;
-		[JsonIgnore] public byte OrderingChannel = 0;
-		[JsonIgnore] public int OrderingIndex = 0;
+		[JsonIgnore] public int ReliableMessageNumber;
+		[JsonIgnore] public byte OrderingChannel;
+		[JsonIgnore] public int OrderingIndex;
 
-		[JsonIgnore] public bool ForceClear = false;
+		[JsonIgnore] public bool ForceClear;
 
 		[JsonIgnore] public byte Id;
+		[JsonIgnore] public bool IsMcpe;
 
 		protected MemoryStream _buffer;
 		private BinaryWriter _writer;
@@ -500,6 +501,30 @@ namespace MiNET.Net
 			return records;
 		}
 
+
+		public void Write(BlockUpdateRecords records)
+		{
+			WriteUnsignedVarInt((uint) records.Count);
+			foreach (var coord in records)
+			{
+				//Write(coord);
+			}
+		}
+
+		public BlockUpdateRecords ReadBlockUpdateRecords()
+		{
+			var records = new BlockUpdateRecords();
+			uint count = ReadUnsignedVarInt();
+			for (int i = 0; i < count; i++)
+			{
+				var coord = ReadBlockCoordinates();
+				//records.Add(coord);
+			}
+
+			return records;
+		}
+
+
 		public void Write(Records records)
 		{
 			WriteUnsignedVarInt((uint) records.Count);
@@ -690,8 +715,8 @@ namespace MiNET.Net
 
 		public void Write(ItemStacks metadata)
 		{
-			McpeContainerSetContent msg = this as McpeContainerSetContent;
-			bool signItems = msg == null || msg.windowId != 0x79;
+			McpeInventoryContent msg = this as McpeInventoryContent;
+			bool signItems = msg == null || msg.inventoryId != 0x79;
 
 			if (metadata == null)
 			{
@@ -719,6 +744,180 @@ namespace MiNET.Net
 			}
 
 			return metadata;
+		}
+
+		const int InvSourceTypeContainer = 0;
+		const int InvSourceTypeGlobal = 1;
+		const int InvSourceTypeWorldInteraction = 2;
+		const int InvSourceTypeCreative = 3;
+		const int InvSourceTypeCraft = 99999;
+
+		const int TransactionTypeNormal = 0;
+		const int TransactionTypeInventoryMismatch = 1;
+		const int TransactionTypeItemUse = 2;
+		const int TransactionTypeItemUseOnEntity = 3;
+		const int TransactionTypeItemRelease = 4;
+
+		const int ItemReleaseActionRelease = 0;
+		const int ItemReleaseActionUse = 1;
+
+		const int ItemUseActionPlace = 0;
+		const int ItemUseActionUse = 1;
+		const int ItemUseActionDestroy = 2;
+
+		const int ItemUseOnEntityActionInteract = 0;
+		const int ItemUseOnEntityActionAttack = 1;
+		const int ItemUseOnEntityActionItemInteract = 2;
+
+
+		public void Write(Transaction trans)
+		{
+			WriteVarInt(trans.TransactionType);
+			WriteVarInt(trans.Transactions.Count);
+			foreach (var record in trans.Transactions)
+			{
+				if (record is ContainerTransactionRecord)
+				{
+					var r = record as ContainerTransactionRecord;
+					WriteSignedVarInt(r.InventoryId);
+				}
+				else if (record is GlobalTransactionRecord)
+				{
+				}
+				else if (record is WorldInteractionTransactionRecord)
+				{
+					var r = record as WorldInteractionTransactionRecord;
+					WriteVarInt(r.Flags);
+				}
+				else if (record is CreativeTransactionRecord)
+				{
+				}
+				else if (record is CraftTransactionRecord)
+				{
+					var r = record as CraftTransactionRecord;
+					WriteVarInt(r.Action);
+				}
+
+				WriteVarInt(record.Slot);
+				Write(record.OldItem);
+				Write(record.NewItem);
+			}
+
+			switch (trans.TransactionType)
+			{
+				case TransactionTypeNormal:
+				case TransactionTypeInventoryMismatch:
+					break;
+				case TransactionTypeItemUse:
+					WriteVarInt(trans.ActionType);
+					Write(trans.Position);
+					WriteSignedVarInt(trans.Face);
+					WriteSignedVarInt(trans.Slot);
+					Write(trans.Item);
+					Write(trans.FromPosition);
+					Write(trans.ClickPosition);
+					break;
+				case TransactionTypeItemUseOnEntity:
+					WriteVarLong(trans.EntityId);
+					WriteVarInt(trans.ActionType);
+					WriteSignedVarInt(trans.Slot);
+					Write(trans.Item);
+					Write(trans.FromPosition);
+					break;
+				case TransactionTypeItemRelease:
+					WriteVarInt(trans.ActionType);
+					WriteSignedVarInt(trans.Slot);
+					Write(trans.Item);
+					Write(trans.FromPosition);
+					break;
+				default:
+					break;
+			}
+		}
+
+		public Transaction ReadTransaction()
+		{
+			var trans = new Transaction();
+
+			trans.TransactionType = ReadVarInt();
+
+			var count = ReadVarInt();
+			for (int i = 0; i < count; i++)
+			{
+				TransactionRecord record = null;
+				int sourceType = ReadVarInt();
+				switch (sourceType)
+				{
+					case InvSourceTypeContainer:
+						record = new ContainerTransactionRecord()
+						{
+							InventoryId = ReadSignedVarInt()
+						};
+						break;
+					case InvSourceTypeGlobal:
+						record = new GlobalTransactionRecord();
+						break;
+					case InvSourceTypeWorldInteraction:
+						record = new WorldInteractionTransactionRecord()
+						{
+							Flags = ReadVarInt()
+						};
+						break;
+					case InvSourceTypeCreative:
+						record = new CreativeTransactionRecord()
+						{
+							InventoryId = 0x79
+						};
+						break;
+					case InvSourceTypeCraft:
+						record = new CraftTransactionRecord()
+						{
+							Action = ReadVarInt()
+						};
+						break;
+					default:
+						Log.Error($"Unknown inventory source type={sourceType}");
+						continue;
+				}
+
+				record.Slot = ReadVarInt();
+				record.OldItem = ReadItem();
+				record.NewItem = ReadItem();
+				trans.Transactions.Add(record);
+			}
+
+			switch (trans.TransactionType)
+			{
+				case TransactionTypeNormal:
+				case TransactionTypeInventoryMismatch:
+					break;
+				case TransactionTypeItemUse:
+					trans.ActionType = ReadVarInt();
+					trans.Position = ReadBlockCoordinates();
+					trans.Face = ReadSignedVarInt();
+					trans.Slot = ReadSignedVarInt();
+					trans.Item = ReadItem();
+					trans.FromPosition = ReadVector3();
+					trans.ClickPosition = ReadVector3();
+					break;
+				case TransactionTypeItemUseOnEntity:
+					trans.EntityId = ReadVarLong();
+					trans.ActionType = ReadVarInt();
+					trans.Slot = ReadSignedVarInt();
+					trans.Item = ReadItem();
+					trans.FromPosition = ReadVector3();
+					break;
+				case TransactionTypeItemRelease:
+					trans.ActionType = ReadVarInt();
+					trans.Slot = ReadSignedVarInt();
+					trans.Item = ReadItem();
+					trans.FromPosition = ReadVector3();
+					break;
+				default:
+					break;
+			}
+
+			return trans;
 		}
 
 		public void Write(Item stack, bool signItem = true)
@@ -1528,12 +1727,12 @@ namespace MiNET.Net
 		{
 			_buffer.Position = 0;
 			Write(Id);
+			if (IsMcpe) Write((short)0);
 		}
 
 		public virtual void Reset()
 		{
 			ResetPackage();
-
 			DatagramSequenceNumber = -1;
 
 			Reliability = Reliability.Unreliable;
@@ -1554,6 +1753,7 @@ namespace MiNET.Net
 
 		protected virtual void ResetPackage()
 		{
+
 		}
 
 
@@ -1587,6 +1787,7 @@ namespace MiNET.Net
 		{
 			_buffer.Position = 0;
 			Id = ReadByte();
+			if(IsMcpe) ReadShort();
 		}
 
 		public virtual void Decode(byte[] buffer)
