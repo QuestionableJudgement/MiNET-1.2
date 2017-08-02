@@ -71,7 +71,7 @@ namespace MiNET
 			}
 
 			_playerInfo.ProtocolVersion = message.protocolVersion;
-			_playerInfo.Edition = message.edition;
+			//_playerInfo.Edition = message.;
 
 			DecodeCert(message);
 
@@ -202,6 +202,7 @@ namespace MiNET
 					JArray chain = json.chain;
 					var chainArray = chain.ToArray();
 					string identityPublicKey = null;
+					CngKey tk = null;
 					foreach (dynamic o in chainArray)
 					{
 						IDictionary<string, dynamic> headers = JWT.Headers(o.ToString());
@@ -248,9 +249,14 @@ namespace MiNET
 							}
 
 							// Validate
-							CngKey newKey = CryptoUtils.ImportECDsaCngKeyFromString(certString);
-							CertificateData data = JWT.Decode<CertificateData>(o.ToString(), newKey);
+							var newKey = CryptoUtils.ImportECDsaCngKeyFromString(certString);
 
+							if (tk == null)
+							{
+								tk = newKey;
+							}
+							CertificateData data = JWT.Decode<CertificateData>(o.ToString(), newKey);
+							Log.Warn(newKey);
 							if (data != null)
 							{
 								identityPublicKey = data.IdentityPublicKey;
@@ -349,10 +355,16 @@ namespace MiNET
 							var response = McpeServerToClientHandshake.CreateObject();
 							response.NoBatch = true;
 							response.ForceClear = true;
-							response.serverPublicKey = Convert.ToBase64String(ecKey.PublicKey.GetDerEncoded());
-							response.tokenLength = (short) ecKey.SecretPrepend.Length;
-							response.token = ecKey.SecretPrepend;
 
+							string b64Key = Convert.ToBase64String(ecKey.PublicKey.GetDerEncoded());
+
+							var j = CngKey.Create(CngAlgorithm.ECDiffieHellmanP384, null, new CngKeyCreationParameters() { ExportPolicy = CngExportPolicies.AllowPlaintextExport, KeyUsage = CngKeyUsages.AllUsages });
+							var jwt = JWT.Encode(new object[] {
+								new []{ "salt", "sNUMIRcN2BSNRw93P5vGpg==" }
+							}, j, JwsAlgorithm.ES384, new Dictionary<string, object> { { "x5u", b64Key } });
+							response.token = jwt;
+
+							Console.WriteLine("Wow encryptboy");
 							_session.SendPackage(response);
 
 							if (Log.IsDebugEnabled) Log.Warn($"Encryption enabled for {_session.Username}");
@@ -511,6 +523,10 @@ namespace MiNET
 		}
 
 		public void HandleMcpeResourcePackChunkRequest(McpeResourcePackChunkRequest message)
+		{
+		}
+
+		public void HandleMcpeModalFormResponse(McpeModalFormResponse message)
 		{
 		}
 	}

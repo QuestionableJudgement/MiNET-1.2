@@ -101,6 +101,8 @@ Read more about packets and this specification on the [Protocol Wiki](https://gi
 | Set Last Hurt By | 0x60 | 96 |   
 | Book Edit | 0x61 | 97 |   
 | Npc Request | 0x62 | 98 |   
+| Modal Form Request | 0x64 | 100 |   
+| Modal Form Response | 0x65 | 101 |   
 
 
 ## Data types
@@ -122,7 +124,6 @@ Read more about packets and this specification on the [Protocol Wiki](https://gi
 | IPEndPoint[] [(wiki)](https://github.com/NiclasOlofsson/MiNET/wiki//Protocol-Type-IPEndPoint[]) |
 | Item [(wiki)](https://github.com/NiclasOlofsson/MiNET/wiki//Protocol-Type-Item) |
 | ItemStacks [(wiki)](https://github.com/NiclasOlofsson/MiNET/wiki//Protocol-Type-ItemStacks) |
-| Length [(wiki)](https://github.com/NiclasOlofsson/MiNET/wiki//Protocol-Type-Length) |
 | Links [(wiki)](https://github.com/NiclasOlofsson/MiNET/wiki//Protocol-Type-Links) |
 | long [(wiki)](https://github.com/NiclasOlofsson/MiNET/wiki//Protocol-Type-long) |
 | MapInfo [(wiki)](https://github.com/NiclasOlofsson/MiNET/wiki//Protocol-Type-MapInfo) |
@@ -217,9 +218,7 @@ Wiki: [Server To Client Handshake](https://github.com/NiclasOlofsson/MiNET/wiki/
 
 | Name | Type | Size |
 |:-----|:-----|:-----|
-|Server Public Key | string |  |
-|Token Length | Length |  |
-|Token | byte[] | 0 |
+|Token | string |  |
 -----------------------------------------------------------------------
 ### Client To Server Handshake (0x04)
 Wiki: [Client To Server Handshake](https://github.com/NiclasOlofsson/MiNET/wiki//Protocol-ClientToServerHandshake)
@@ -1881,6 +1880,38 @@ Wiki: [Npc Request](https://github.com/NiclasOlofsson/MiNET/wiki//Protocol-NpcRe
 
 | Name | Type | Size |
 |:-----|:-----|:-----|
+-----------------------------------------------------------------------
+### Modal Form Request (0x64)
+Wiki: [Modal Form Request](https://github.com/NiclasOlofsson/MiNET/wiki//Protocol-ModalFormRequest)
+
+**Sent from server:** true  
+**Sent from client:** false
+
+
+
+
+#### Fields
+
+| Name | Type | Size |
+|:-----|:-----|:-----|
+|FormId | VarInt |  |
+|Data | string |  |
+-----------------------------------------------------------------------
+### Modal Form Response (0x65)
+Wiki: [Modal Form Response](https://github.com/NiclasOlofsson/MiNET/wiki//Protocol-ModalFormResponse)
+
+**Sent from server:** false  
+**Sent from client:** true
+
+
+
+
+#### Fields
+
+| Name | Type | Size |
+|:-----|:-----|:-----|
+|FormId | VarInt |  |
+|Data | string |  |
 -----------------------------------------------------------------------
 
 

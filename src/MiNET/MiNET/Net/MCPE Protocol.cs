@@ -73,6 +73,7 @@ namespace MiNET.Net
 		void HandleMcpeCommandRequest(McpeCommandRequest message);
 		void HandleMcpeCommandBlockUpdate(McpeCommandBlockUpdate message);
 		void HandleMcpeResourcePackChunkRequest(McpeResourcePackChunkRequest message);
+		void HandleMcpeModalFormResponse(McpeModalFormResponse message);
 	}
 
 	public class PackageFactory
@@ -540,6 +541,14 @@ namespace MiNET.Net
 						return package;
 					case 0x62:
 						package = McpeNpcRequest.CreateObject();
+						package.Decode(buffer);
+						return package;
+					case 0x64:
+						package = McpeModalFormRequest.CreateObject();
+						package.Decode(buffer);
+						return package;
+					case 0x65:
+						package = McpeModalFormResponse.CreateObject();
 						package.Decode(buffer);
 						return package;
 				}
@@ -1526,9 +1535,7 @@ namespace MiNET.Net
 	public partial class McpeServerToClientHandshake : Package<McpeServerToClientHandshake>
 	{
 
-		public string serverPublicKey; // = null;
-		public int tokenLength; // = null;
-		public byte[] token; // = null;
+		public string token; // = null;
 
 		public McpeServerToClientHandshake()
 		{
@@ -1542,8 +1549,6 @@ namespace MiNET.Net
 
 			BeforeEncode();
 
-			Write(serverPublicKey);
-			WriteLength(tokenLength);
 			Write(token);
 
 			AfterEncode();
@@ -1558,9 +1563,7 @@ namespace MiNET.Net
 
 			BeforeDecode();
 
-			serverPublicKey = ReadString();
-			tokenLength = ReadLength();
-			token = ReadBytes(0);
+			token = ReadString();
 
 			AfterDecode();
 		}
@@ -1572,9 +1575,7 @@ namespace MiNET.Net
 		{
 			base.ResetPackage();
 
-			serverPublicKey=default(string);
-			tokenLength=default(int);
-			token=default(byte[]);
+			token=default(string);
 		}
 
 	}
@@ -6710,6 +6711,110 @@ namespace MiNET.Net
 		{
 			base.ResetPackage();
 
+		}
+
+	}
+
+	public partial class McpeModalFormRequest : Package<McpeModalFormRequest>
+	{
+
+		public int formid; // = null;
+		public string data; // = null;
+
+		public McpeModalFormRequest()
+		{
+			Id = 0x64;
+			IsMcpe = true;
+		}
+
+		protected override void EncodePackage()
+		{
+			base.EncodePackage();
+
+			BeforeEncode();
+
+			WriteVarInt(formid);
+			Write(data);
+
+			AfterEncode();
+		}
+
+		partial void BeforeEncode();
+		partial void AfterEncode();
+
+		protected override void DecodePackage()
+		{
+			base.DecodePackage();
+
+			BeforeDecode();
+
+			formid = ReadVarInt();
+			data = ReadString();
+
+			AfterDecode();
+		}
+
+		partial void BeforeDecode();
+		partial void AfterDecode();
+
+		protected override void ResetPackage()
+		{
+			base.ResetPackage();
+
+			formid=default(int);
+			data=default(string);
+		}
+
+	}
+
+	public partial class McpeModalFormResponse : Package<McpeModalFormResponse>
+	{
+
+		public int formid; // = null;
+		public string data; // = null;
+
+		public McpeModalFormResponse()
+		{
+			Id = 0x65;
+			IsMcpe = true;
+		}
+
+		protected override void EncodePackage()
+		{
+			base.EncodePackage();
+
+			BeforeEncode();
+
+			WriteVarInt(formid);
+			Write(data);
+
+			AfterEncode();
+		}
+
+		partial void BeforeEncode();
+		partial void AfterEncode();
+
+		protected override void DecodePackage()
+		{
+			base.DecodePackage();
+
+			BeforeDecode();
+
+			formid = ReadVarInt();
+			data = ReadString();
+
+			AfterDecode();
+		}
+
+		partial void BeforeDecode();
+		partial void AfterDecode();
+
+		protected override void ResetPackage()
+		{
+			base.ResetPackage();
+
+			formid=default(int);
+			data=default(string);
 		}
 
 	}

@@ -284,6 +284,8 @@ namespace MiNET
 		internal void HandlePackage(Package message, PlayerNetworkSession playerSession)
 		{
 			//SignalTick();
+			//Log.Warn($"Received message " + message.GetType());
+
 
 			try
 			{
@@ -553,9 +555,20 @@ namespace MiNET
 			{
 				handler.HandleMcpeBlockPickRequest((McpeBlockPickRequest) message);
 			}
+
 			else if (typeof (McpeCommandBlockUpdate) == message.GetType())
 			{
 				handler.HandleMcpeCommandBlockUpdate((McpeCommandBlockUpdate) message);
+			}
+
+			else if (typeof(McpeInventoryTransaction) == message.GetType())
+			{
+				handler.HandleMcpeInventoryTransaction((McpeInventoryTransaction)message);
+			}
+
+			else if (typeof(McpeModalFormResponse) == message.GetType())
+			{
+				handler.HandleMcpeModalFormResponse((McpeModalFormResponse)message);
 			}
 
 			else
@@ -642,6 +655,8 @@ namespace MiNET
 
 		public void SendPackage(Package package)
 		{
+			//Log.Warn("Send " + package.GetType());
+
 			if (package == null) return;
 
 			if (State == ConnectionState.Unconnected)

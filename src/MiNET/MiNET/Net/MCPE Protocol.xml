@@ -136,9 +136,7 @@
 	</pdu>
 
 	<pdu id="0x03" online="false" client="false" server="true" name="MCPE_SERVER_TO_CLIENT_HANDSHAKE">
-		<field name="Server Public Key" type="string" />
-		<field name="Token Length" type="Length" />
-		<field name="Token" type="byte[]" size="0" />
+		<field name="Token" type="string" />
 	</pdu>
 
 	<pdu id="0x04" online="false" client="true" server="false" name="MCPE_CLIENT_TO_SERVER_HANDSHAKE">
@@ -706,6 +704,16 @@
 	</pdu>
 
 	<pdu id="0x50" online="false" client="false" server="true" name="MCPE_UPDATE_TRADE">
+		<field name="Window ID" type="byte" />
+		<field name="Window Type" type="byte" />
+		<field name="Unknown0" type="VarInt" />
+		<field name="Unknown1" type="VarInt" />
+		<field name="Is Willing" type="bool" />
+		<field name="Trader Entity ID" type="SignedVarLong" />
+		<field name="Player Entity ID" type="SignedVarLong" />
+		<field name="Display Name" type="string" />
+		<field name="Display Name" type="string" />
+		<field name="NamedTag" type="Nbt" />
 	</pdu>
 
 	<pdu id="0x51" online="false" client="false" server="true" name="MCPE_UPDATE_EQUIPMENT">
@@ -767,11 +775,20 @@
 	</pdu>
 
 	<pdu id="0x59" online="false" client="false" server="true" name="MCPE_ADD_BEHAVIOR_TREE">
+    <field name="BehaviorTree" type="string" />
 	</pdu>
 
 	<pdu id="0x5a" online="false" client="false" server="true" name="MCPE_STRUCTURE_BLOCK_UPDATE">
 	</pdu>
 
+	<pdu id="0x5b" online="false" client="false" server="true" name="MCPE_SHOW_STORE_OFFER">
+    <field name="Unknown0" type="string" />
+    <field name="Unknown1" type="bool" />
+	</pdu>
+  
+  <pdu id="0x5c" online="false" client="true" server="false" name="MCPE_PURCHASE_RECEIPT">
+	</pdu>
+  
 	<pdu id="0x5d" online="false" client="false" server="true" name="MCPE_PLAYER_SKIN">
 	</pdu>
 
@@ -779,17 +796,33 @@
 	</pdu>
 
 	<pdu id="0x5f" online="false" client="false" server="true" name="MCPE_INITIATE_WEB_SOCKET_CONNECTION">
+    <field name="Server" type="string" />
 	</pdu>
 
 	<pdu id="0x60" online="false" client="false" server="true" name="MCPE_SET_LAST_HURT_BY">
+    <field name="Unknown" type="VarInt" />
 	</pdu>
 
 	<pdu id="0x61" online="false" client="false" server="true" name="MCPE_BOOK_EDIT">
 	</pdu>
 
 	<pdu id="0x62" online="false" client="false" server="true" name="MCPE_NPC_REQUEST">
+		<field name="Runtime Entity ID" type="UnsignedVarLong" />
+    <field name="Unknown0" type="byte" />
+    <field name="Unknown1" type="string" />
+    <field name="Unknown2" type="byte" />
 	</pdu>
 
+  <pdu id="0x64" online="false" client="false" server="true" name="MCPE_MODAL_FORM_REQUEST">
+    <field name="FormId" type="VarInt" />
+    <field name="Data" type="string" />
+  </pdu>
+
+  <pdu id="0x65" online="false" client="true" server="false" name="MCPE_MODAL_FORM_RESPONSE">
+    <field name="FormId" type="VarInt" />
+    <field name="Data" type="string" />
+  </pdu>
+  
 	<pdu namespace="raknet" id="0xfe" online="false" client="false" server="true" name="MCPE_WRAPPER">
 		<field name="Payload" type="byte[]" size="0" />
 	</pdu>

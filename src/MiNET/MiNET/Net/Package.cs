@@ -846,7 +846,7 @@ namespace MiNET.Net
 			{
 				TransactionRecord record = null;
 				int sourceType = ReadVarInt();
-				switch (sourceType)
+				switch (sourceType)	
 				{
 					case InvSourceTypeContainer:
 						record = new ContainerTransactionRecord()

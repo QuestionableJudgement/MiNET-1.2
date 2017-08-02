@@ -961,11 +961,19 @@ namespace MiNET.Worlds
 
 			if (!broadcast) return;
 
-			//var message = McpeUpdateBlock.CreateObject();
-			//message.blockId = block.Id;
+			var message = McpeUpdateBlock.CreateObject();
+			message.records = new BlockUpdateRecords()
+			{
+				new BlockUpdateRecord
+				{
+					Coordinates = block.Coordinates,
+					BlockId = block.Id,
+					BlockMetadata = (byte) (0xb << 4 | (block.Metadata & 0xf))
+				}
+			};
 			//message.coordinates = block.Coordinates;
 			//message.blockMetaAndPriority = (byte) (0xb << 4 | (block.Metadata & 0xf));
-			//RelayBroadcast(message);
+			RelayBroadcast(message);
 		}
 
 		private void CalculateSkyLight(int x, int y, int z)
