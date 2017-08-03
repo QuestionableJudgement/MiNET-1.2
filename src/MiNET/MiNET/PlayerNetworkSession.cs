@@ -571,6 +571,16 @@ namespace MiNET
 				handler.HandleMcpeModalFormResponse((McpeModalFormResponse)message);
 			}
 
+			else if (typeof(McpeServerSettingsRequest) == message.GetType())
+			{
+				handler.HandleMcpeServerSettingsRequest((McpeServerSettingsRequest)message);
+			}
+
+			else if (typeof(McpePlayerSkin) == message.GetType())
+			{
+				handler.HandleMcpePlayerSkin((McpePlayerSkin)message);
+			}
+
 			else
 			{
 				Log.Error($"Unhandled package: {message.GetType().Name} 0x{message.Id:X2} for user: {Username}, IP {EndPoint.Address}");

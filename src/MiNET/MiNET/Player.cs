@@ -522,7 +522,7 @@ namespace MiNET
 			SendPackage(mcpeAdventureSettings);
 		}
 
-		public UserPermission PermissionLevel { get; set; } = UserPermission.Admin;
+		public UserPermission PermissionLevel { get; set; } = UserPermission.Any;
 
 		public bool IsSpectator { get; set; }
 
@@ -1810,58 +1810,63 @@ namespace MiNET
 					_itemUseTimer = 0;
 					break;
 				case McpeInventoryTransaction.TransactionTypes.ItemUse:
-					Log.Warn("Receive use item transaction");
-
 					var item = transaction.Item;
+
 					if (GameMode != GameMode.Creative && !VerifyItemStack(item))
 					{
 						Log.Warn($"Kicked {Username} for use item hacking.");
 						Disconnect("Error #324. Please report this error.");
 						return;
 					}
-
-					/*var modal = McpeModalFormRequest.CreateObject();
-					modal.formid = 0;
-					modal.data = "{\"title\": \"Account restore\", \"type\": \"custom_form\", \"content\": [{\"type\": \"label\", \"text\": \"Hello, undrfined!\nAs you might have pointed, we are now using §2Xbox Live§f authorization. If you want to restore your progress, enter your login and password from old server.\nIf you do not have anything to restore, press the cross in the right top corner of this form.\n\n§eWarning!§f Your old account will be wiped.\"}, {\"type\": \"input\", \"placeholder\": \"Login\", \"text\": \"\"}, {\"type\": \"input\", \"placeholder\": \"Password\", \"text\": \"\"}]}";
-					SendPackage(modal);*/
-
-					// Make sure we are holding the item we claim to be using
 					if (itemInHand == null || itemInHand.Id != item.Id)
 					{
 						Log.Warn($"Use item detected difference between server and client. Expected item {transaction.Item} but server had item {itemInHand}");
 						return;  // Cheat(?)
 					}
 
-					if (itemInHand.GetType() == typeof(Item))
+					switch ((McpeInventoryTransaction.ItemUseAction) transaction.ActionType)
 					{
-						Log.Warn($"Generic item in hand when placing block. Can not complete request. Expected item {item} and item in hand is {itemInHand}");
+						case McpeInventoryTransaction.ItemUseAction.Destroy:
+							Level.BreakBlock(this, transaction.Position);
+							break;
+						case McpeInventoryTransaction.ItemUseAction.Place:
+						case McpeInventoryTransaction.ItemUseAction.Use:
+							if (itemInHand.GetType() == typeof(Item))
+							{
+								Log.Warn($"Generic item in hand when placing block. Can not complete request. Expected item {item} and item in hand is {itemInHand}");
+							}
+
+							if (transaction.Face >= 0 && transaction.Face <= 5)
+							{
+								Level.Interact(this, itemInHand, transaction.Position, (BlockFace)transaction.Face, transaction.FromPosition);
+							}
+							else
+							{
+								Log.Debug($"Begin non-block action with {itemInHand}");
+
+								// Snowballs and shit
+
+								_itemUseTimer = Level.TickTime;
+
+								itemInHand.UseItem(Level, this, transaction.Position);
+
+								IsUsingItem = true;
+								var metadata = new MetadataDictionary
+								{
+									[0] = GetDataValue()
+								};
+
+								var setEntityData = McpeSetEntityData.CreateObject();
+								setEntityData.runtimeEntityId = EntityId;
+								setEntityData.metadata = metadata;
+								Level.RelayBroadcast(this, setEntityData);
+							}
+							break;
 					}
-
-					if (transaction.Face >= 0 && transaction.Face <= 5)
-					{
-						Level.Interact(this, itemInHand, transaction.Position, (BlockFace)transaction.Face, transaction.FromPosition);
-					}
-					else
-					{
-						Log.Debug($"Begin non-block action with {itemInHand}");
-
-						// Snowballs and shit
-
-						_itemUseTimer = Level.TickTime;
-
-						itemInHand.UseItem(Level, this, transaction.Position);
-
-						IsUsingItem = true;
-						MetadataDictionary metadata = new MetadataDictionary
-						{
-							[0] = GetDataValue()
-						};
-
-						var setEntityData = McpeSetEntityData.CreateObject();
-						setEntityData.runtimeEntityId = EntityId;
-						setEntityData.metadata = metadata;
-						Level.RelayBroadcast(this, setEntityData);
-					}
+					/*var modal = McpeModalFormRequest.CreateObject();
+					modal.formid = 0;
+					modal.data = "{\"title\": \"Account restore\", \"type\": \"custom_form\", \"content\": [{\"type\": \"label\", \"text\": \"Hello, undrfined!\nAs you might have pointed, we are now using §2Xbox Live§f authorization. If you want to restore your progress, enter your login and password from old server.\nIf you do not have anything to restore, press the cross in the right top corner of this form.\n\n§eWarning!§f Your old account will be wiped.\"}, {\"type\": \"input\", \"placeholder\": \"Login\", \"text\": \"\"}, {\"type\": \"input\", \"placeholder\": \"Password\", \"text\": \"\"}]}";
+					SendPackage(modal);*/
 					break;
 			}
 		}
@@ -2166,6 +2171,12 @@ namespace MiNET
 			mcpeStartGame.eduMode = PlayerInfo.Edition == 1;
 			mcpeStartGame.rainLevel = 0;
 			mcpeStartGame.lightnigLevel = 0;
+			mcpeStartGame.trustPlayers = 0;
+			mcpeStartGame.permissionLevel = PermissionLevel == UserPermission.Admin ? 2 : 1;
+			mcpeStartGame.gamePublishSetting = 4;
+			mcpeStartGame.isMultiplayer = 1;
+			mcpeStartGame.broadcastToLan = 1;
+			mcpeStartGame.broadcastToXbl = 1;
 			mcpeStartGame.enableCommands = EnableCommands;
 			mcpeStartGame.isTexturepacksRequired = false;
 			mcpeStartGame.gamerules = GetGameRules();
@@ -2637,10 +2648,6 @@ namespace MiNET
 			metadata[4] = new MetadataString(NameTag ?? Username);
 			metadata[40] = new MetadataString(ButtonText ?? string.Empty);
 			
-			for(byte i = 4; i < 80; i++)
-			{
-				metadata[i] = new MetadataInt(1);
-			}
 			//MetadataDictionary metadata = new MetadataDictionary();
 			//metadata[0] = new MetadataLong(GetDataValue()); // 10000000000000011000000000000000
 			//metadata[1] = new MetadataInt(1);
@@ -2964,6 +2971,40 @@ namespace MiNET
 		public void HandleMcpeModalFormResponse(McpeModalFormResponse message)
 		{
 			Console.WriteLine(message.data + " , " + message.formid);
+		}
+
+		public void HandleMcpePurchaseReceipt(McpePurchaseReceipt message)
+		{
+
+		}
+
+		public void HandleMcpePlayerSkin(McpePlayerSkin message)
+		{
+			Skin = new Skin()
+			{
+				SkinType = message.skinName,
+				Texture = message.skinData,
+				GeometryType = message.geometryModel,
+				GeometryData = message.geometryData,
+			};
+			{
+				McpePlayerList playerList = McpePlayerList.CreateObject();
+				playerList.records = new PlayerRemoveRecords { this };
+				Level.RelayBroadcast(Level.CreateMcpeBatch(playerList.Encode()));
+				playerList.records = null;
+				playerList.PutPool();
+			}
+			{
+				McpePlayerList playerList = McpePlayerList.CreateObject();
+				playerList.records = new PlayerAddRecords { this };
+				Level.RelayBroadcast(Level.CreateMcpeBatch(playerList.Encode()));
+				playerList.records = null;
+				playerList.PutPool();
+			}
+		}
+
+		public virtual void HandleMcpeServerSettingsRequest(McpeServerSettingsRequest message)
+		{
 		}
 	}
 

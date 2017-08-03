@@ -445,6 +445,7 @@ namespace MiNET.Net
 					WriteSignedVarLong(record.EntityId);
 					Write(record.DisplayName ?? record.Username);
 					Write(record.Skin);
+					Write(record.CertificateData.ExtraData.Xuid);
 				}
 			}
 			else if (records is PlayerRemoveRecords)
@@ -504,10 +505,12 @@ namespace MiNET.Net
 
 		public void Write(BlockUpdateRecords records)
 		{
-			WriteUnsignedVarInt((uint) records.Count);
+			//WriteUnsignedVarInt((uint) records.Count);
 			foreach (var coord in records)
 			{
-				//Write(coord);
+				Write(coord.Coordinates);
+				WriteUnsignedVarInt((uint)coord.BlockId);
+				WriteUnsignedVarInt((uint)((0xb << 4) | coord.BlockMetadata));
 			}
 		}
 
@@ -1324,6 +1327,8 @@ namespace MiNET.Net
 				Write(skinType);
 				WriteUnsignedVarInt((uint) skin.Texture.Length);
 				Write(skin.Texture);
+				Write(skin.GeometryType);
+				Write(skin.GeometryData);
 			}
 		}
 
@@ -1348,6 +1353,8 @@ namespace MiNET.Net
 						skin.SkinType = null;
 					}
 				}
+				skin.GeometryType = ReadString();
+				skin.GeometryData = ReadString();
 			}
 			catch (Exception e)
 			{

@@ -55,6 +55,10 @@
       <Project>{672c13dd-9823-4df2-9d1b-4895cc6b3cac}</Project>
       <Name>MiNET.Test</Name>
     </ProjectReference>
+    <ProjectReference Include="..\MiNET\MiNET.csproj">
+      <Project>{B7049BF1-2DB0-435D-9791-09AB61018685}</Project>
+      <Name>MiNET</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

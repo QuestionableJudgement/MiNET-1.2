@@ -211,8 +211,15 @@
 		<field name="Rain level" type="float" />
 		<field name="Lightnig level" type="float" />
 		<field name="Enable commands" type="bool" />
+		<field name="Is Multiplayer" type="byte" />
+		<field name="Broadcast To LAN" type="byte" />
+		<field name="Broadcast To XBL" type="byte" />
 		<field name="Is texturepacks required" type="bool" />
 		<field name="GameRules" type="GameRules" />
+		<field name="Bonus Chest" type="byte" />
+		<field name="Trust Players" type="byte" />
+		<field name="Permission Level" type="SignedVarInt" />
+		<field name="Game Publish Setting" type="SignedVarInt" />
 		<field name="Level ID" type="string" />
 		<field name="World name" type="string" />
 		<field name="Premium World Template Id" type="string" />
@@ -304,8 +311,9 @@
 			<enum id="Normal" value="0" />
 			<enum id="Reset" value="1" />
 			<enum id="Rotation" value="2" />
+			<enum id="Pitch" value="3" />
 		</enums>
-		
+
 		<field name="Runtime Entity ID" type="UnsignedVarLong" />
 		<field name="X" type="float" />
 		<field name="Y" type="float" />
@@ -712,7 +720,6 @@
 		<field name="Trader Entity ID" type="SignedVarLong" />
 		<field name="Player Entity ID" type="SignedVarLong" />
 		<field name="Display Name" type="string" />
-		<field name="Display Name" type="string" />
 		<field name="NamedTag" type="Nbt" />
 	</pdu>
 
@@ -775,32 +782,40 @@
 	</pdu>
 
 	<pdu id="0x59" online="false" client="false" server="true" name="MCPE_ADD_BEHAVIOR_TREE">
-    <field name="BehaviorTree" type="string" />
+		<field name="BehaviorTree" type="string" />
 	</pdu>
 
 	<pdu id="0x5a" online="false" client="false" server="true" name="MCPE_STRUCTURE_BLOCK_UPDATE">
 	</pdu>
 
 	<pdu id="0x5b" online="false" client="false" server="true" name="MCPE_SHOW_STORE_OFFER">
-    <field name="Unknown0" type="string" />
-    <field name="Unknown1" type="bool" />
+		<field name="Unknown0" type="string" />
+		<field name="Unknown1" type="bool" />
 	</pdu>
-  
-  <pdu id="0x5c" online="false" client="true" server="false" name="MCPE_PURCHASE_RECEIPT">
+
+	<pdu id="0x5c" online="false" client="true" server="false" name="MCPE_PURCHASE_RECEIPT">
 	</pdu>
-  
-	<pdu id="0x5d" online="false" client="false" server="true" name="MCPE_PLAYER_SKIN">
+
+	<pdu id="0x5d" online="false" client="true" server="true" name="MCPE_PLAYER_SKIN">
+		<field name="UUID" type="UUID" />
+		<field name="Skin ID" type="string" />
+		<field name="Skin Name" type="string" />
+		<field name="Serialize Name" type="string" />
+		<field name="Skin Length" type="UnsignedVarInt" />
+		<field name="Skin Data" type="byte[]" size="(int) skinLength" />
+		<field name="Geometry Model" type="string" />
+		<field name="Geometry Data" type="string" />
 	</pdu>
 
 	<pdu id="0x5e" online="false" client="false" server="true" name="MCPE_SUB_CLIENT_LOGIN">
 	</pdu>
 
 	<pdu id="0x5f" online="false" client="false" server="true" name="MCPE_INITIATE_WEB_SOCKET_CONNECTION">
-    <field name="Server" type="string" />
+		<field name="Server" type="string" />
 	</pdu>
 
 	<pdu id="0x60" online="false" client="false" server="true" name="MCPE_SET_LAST_HURT_BY">
-    <field name="Unknown" type="VarInt" />
+		<field name="Unknown" type="VarInt" />
 	</pdu>
 
 	<pdu id="0x61" online="false" client="false" server="true" name="MCPE_BOOK_EDIT">
@@ -808,21 +823,29 @@
 
 	<pdu id="0x62" online="false" client="false" server="true" name="MCPE_NPC_REQUEST">
 		<field name="Runtime Entity ID" type="UnsignedVarLong" />
-    <field name="Unknown0" type="byte" />
-    <field name="Unknown1" type="string" />
-    <field name="Unknown2" type="byte" />
+		<field name="Unknown0" type="byte" />
+		<field name="Unknown1" type="string" />
+		<field name="Unknown2" type="byte" />
 	</pdu>
 
-  <pdu id="0x64" online="false" client="false" server="true" name="MCPE_MODAL_FORM_REQUEST">
-    <field name="FormId" type="VarInt" />
-    <field name="Data" type="string" />
-  </pdu>
+	<pdu id="0x64" online="false" client="false" server="true" name="MCPE_MODAL_FORM_REQUEST">
+		<field name="FormId" type="VarInt" />
+		<field name="Data" type="string" />
+	</pdu>
 
-  <pdu id="0x65" online="false" client="true" server="false" name="MCPE_MODAL_FORM_RESPONSE">
-    <field name="FormId" type="VarInt" />
-    <field name="Data" type="string" />
-  </pdu>
-  
+	<pdu id="0x65" online="false" client="true" server="false" name="MCPE_MODAL_FORM_RESPONSE">
+		<field name="FormId" type="VarInt" />
+		<field name="Data" type="string" />
+	</pdu>
+	
+	<pdu id="0x66" online="false" client="true" server="false" name="MCPE_SERVER_SETTINGS_REQUEST">
+	</pdu>
+	
+	<pdu id="0x67" online="false" client="false" server="true" name="MCPE_SERVER_SETTINGS_RESPONSE">
+		<field name="FormId" type="VarInt" />
+		<field name="Data" type="string" />
+	</pdu>
+
 	<pdu namespace="raknet" id="0xfe" online="false" client="false" server="true" name="MCPE_WRAPPER">
 		<field name="Payload" type="byte[]" size="0" />
 	</pdu>

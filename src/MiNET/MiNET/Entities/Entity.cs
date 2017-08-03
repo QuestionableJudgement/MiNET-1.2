@@ -254,6 +254,7 @@ namespace MiNET.Entities
 			bits[(int) DataFlags.Breathing] = IsBreathing;
 			bits[(int) DataFlags.Chested] = IsChested;
 			bits[(int) DataFlags.Stackable] = IsStackable;
+			bits[(int) 46] = true;
 
 			return bits;
 		}

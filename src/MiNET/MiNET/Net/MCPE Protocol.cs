@@ -73,7 +73,10 @@ namespace MiNET.Net
 		void HandleMcpeCommandRequest(McpeCommandRequest message);
 		void HandleMcpeCommandBlockUpdate(McpeCommandBlockUpdate message);
 		void HandleMcpeResourcePackChunkRequest(McpeResourcePackChunkRequest message);
+		void HandleMcpePurchaseReceipt(McpePurchaseReceipt message);
+		void HandleMcpePlayerSkin(McpePlayerSkin message);
 		void HandleMcpeModalFormResponse(McpeModalFormResponse message);
+		void HandleMcpeServerSettingsRequest(McpeServerSettingsRequest message);
 	}
 
 	public class PackageFactory
@@ -519,6 +522,14 @@ namespace MiNET.Net
 						package = McpeStructureBlockUpdate.CreateObject();
 						package.Decode(buffer);
 						return package;
+					case 0x5b:
+						package = McpeShowStoreOffer.CreateObject();
+						package.Decode(buffer);
+						return package;
+					case 0x5c:
+						package = McpePurchaseReceipt.CreateObject();
+						package.Decode(buffer);
+						return package;
 					case 0x5d:
 						package = McpePlayerSkin.CreateObject();
 						package.Decode(buffer);
@@ -549,6 +560,14 @@ namespace MiNET.Net
 						return package;
 					case 0x65:
 						package = McpeModalFormResponse.CreateObject();
+						package.Decode(buffer);
+						return package;
+					case 0x66:
+						package = McpeServerSettingsRequest.CreateObject();
+						package.Decode(buffer);
+						return package;
+					case 0x67:
+						package = McpeServerSettingsResponse.CreateObject();
 						package.Decode(buffer);
 						return package;
 				}
@@ -1976,8 +1995,15 @@ namespace MiNET.Net
 		public float rainLevel; // = null;
 		public float lightnigLevel; // = null;
 		public bool enableCommands; // = null;
+		public byte isMultiplayer; // = null;
+		public byte broadcastToLan; // = null;
+		public byte broadcastToXbl; // = null;
 		public bool isTexturepacksRequired; // = null;
 		public GameRules gamerules; // = null;
+		public byte bonusChest; // = null;
+		public byte trustPlayers; // = null;
+		public int permissionLevel; // = null;
+		public int gamePublishSetting; // = null;
 		public string levelId; // = null;
 		public string worldName; // = null;
 		public string premiumWorldTemplateId; // = null;
@@ -2015,8 +2041,15 @@ namespace MiNET.Net
 			Write(rainLevel);
 			Write(lightnigLevel);
 			Write(enableCommands);
+			Write(isMultiplayer);
+			Write(broadcastToLan);
+			Write(broadcastToXbl);
 			Write(isTexturepacksRequired);
 			Write(gamerules);
+			Write(bonusChest);
+			Write(trustPlayers);
+			WriteSignedVarInt(permissionLevel);
+			WriteSignedVarInt(gamePublishSetting);
 			Write(levelId);
 			Write(worldName);
 			Write(premiumWorldTemplateId);
@@ -2054,8 +2087,15 @@ namespace MiNET.Net
 			rainLevel = ReadFloat();
 			lightnigLevel = ReadFloat();
 			enableCommands = ReadBool();
+			isMultiplayer = ReadByte();
+			broadcastToLan = ReadByte();
+			broadcastToXbl = ReadByte();
 			isTexturepacksRequired = ReadBool();
 			gamerules = ReadGameRules();
+			bonusChest = ReadByte();
+			trustPlayers = ReadByte();
+			permissionLevel = ReadSignedVarInt();
+			gamePublishSetting = ReadSignedVarInt();
 			levelId = ReadString();
 			worldName = ReadString();
 			premiumWorldTemplateId = ReadString();
@@ -2091,8 +2131,15 @@ namespace MiNET.Net
 			rainLevel=default(float);
 			lightnigLevel=default(float);
 			enableCommands=default(bool);
+			isMultiplayer=default(byte);
+			broadcastToLan=default(byte);
+			broadcastToXbl=default(byte);
 			isTexturepacksRequired=default(bool);
 			gamerules=default(GameRules);
+			bonusChest=default(byte);
+			trustPlayers=default(byte);
+			permissionLevel=default(int);
+			gamePublishSetting=default(int);
 			levelId=default(string);
 			worldName=default(string);
 			premiumWorldTemplateId=default(string);
@@ -2557,6 +2604,7 @@ namespace MiNET.Net
 			Normal = 0,
 			Reset = 1,
 			Rotation = 2,
+			Pitch = 3,
 		}
 
 		public long runtimeEntityId; // = null;
@@ -5870,6 +5918,15 @@ namespace MiNET.Net
 	public partial class McpeUpdateTrade : Package<McpeUpdateTrade>
 	{
 
+		public byte windowId; // = null;
+		public byte windowType; // = null;
+		public int unknown0; // = null;
+		public int unknown1; // = null;
+		public bool isWilling; // = null;
+		public long traderEntityId; // = null;
+		public long playerEntityId; // = null;
+		public string displayName; // = null;
+		public Nbt namedtag; // = null;
 
 		public McpeUpdateTrade()
 		{
@@ -5883,6 +5940,15 @@ namespace MiNET.Net
 
 			BeforeEncode();
 
+			Write(windowId);
+			Write(windowType);
+			WriteVarInt(unknown0);
+			WriteVarInt(unknown1);
+			Write(isWilling);
+			WriteSignedVarLong(traderEntityId);
+			WriteSignedVarLong(playerEntityId);
+			Write(displayName);
+			Write(namedtag);
 
 			AfterEncode();
 		}
@@ -5896,6 +5962,15 @@ namespace MiNET.Net
 
 			BeforeDecode();
 
+			windowId = ReadByte();
+			windowType = ReadByte();
+			unknown0 = ReadVarInt();
+			unknown1 = ReadVarInt();
+			isWilling = ReadBool();
+			traderEntityId = ReadSignedVarLong();
+			playerEntityId = ReadSignedVarLong();
+			displayName = ReadString();
+			namedtag = ReadNbt();
 
 			AfterDecode();
 		}
@@ -5907,6 +5982,15 @@ namespace MiNET.Net
 		{
 			base.ResetPackage();
 
+			windowId=default(byte);
+			windowType=default(byte);
+			unknown0=default(int);
+			unknown1=default(int);
+			isWilling=default(bool);
+			traderEntityId=default(long);
+			playerEntityId=default(long);
+			displayName=default(string);
+			namedtag=default(Nbt);
 		}
 
 	}
@@ -6366,6 +6450,7 @@ namespace MiNET.Net
 	public partial class McpeAddBehaviorTree : Package<McpeAddBehaviorTree>
 	{
 
+		public string behaviortree; // = null;
 
 		public McpeAddBehaviorTree()
 		{
@@ -6379,6 +6464,7 @@ namespace MiNET.Net
 
 			BeforeEncode();
 
+			Write(behaviortree);
 
 			AfterEncode();
 		}
@@ -6392,6 +6478,7 @@ namespace MiNET.Net
 
 			BeforeDecode();
 
+			behaviortree = ReadString();
 
 			AfterDecode();
 		}
@@ -6403,6 +6490,7 @@ namespace MiNET.Net
 		{
 			base.ResetPackage();
 
+			behaviortree=default(string);
 		}
 
 	}
@@ -6451,13 +6539,65 @@ namespace MiNET.Net
 
 	}
 
-	public partial class McpePlayerSkin : Package<McpePlayerSkin>
+	public partial class McpeShowStoreOffer : Package<McpeShowStoreOffer>
+	{
+
+		public string unknown0; // = null;
+		public bool unknown1; // = null;
+
+		public McpeShowStoreOffer()
+		{
+			Id = 0x5b;
+			IsMcpe = true;
+		}
+
+		protected override void EncodePackage()
+		{
+			base.EncodePackage();
+
+			BeforeEncode();
+
+			Write(unknown0);
+			Write(unknown1);
+
+			AfterEncode();
+		}
+
+		partial void BeforeEncode();
+		partial void AfterEncode();
+
+		protected override void DecodePackage()
+		{
+			base.DecodePackage();
+
+			BeforeDecode();
+
+			unknown0 = ReadString();
+			unknown1 = ReadBool();
+
+			AfterDecode();
+		}
+
+		partial void BeforeDecode();
+		partial void AfterDecode();
+
+		protected override void ResetPackage()
+		{
+			base.ResetPackage();
+
+			unknown0=default(string);
+			unknown1=default(bool);
+		}
+
+	}
+
+	public partial class McpePurchaseReceipt : Package<McpePurchaseReceipt>
 	{
 
 
-		public McpePlayerSkin()
+		public McpePurchaseReceipt()
 		{
-			Id = 0x5d;
+			Id = 0x5c;
 			IsMcpe = true;
 		}
 
@@ -6491,6 +6631,82 @@ namespace MiNET.Net
 		{
 			base.ResetPackage();
 
+		}
+
+	}
+
+	public partial class McpePlayerSkin : Package<McpePlayerSkin>
+	{
+
+		public UUID uuid; // = null;
+		public string skinId; // = null;
+		public string skinName; // = null;
+		public string serializeName; // = null;
+		public uint skinLength; // = null;
+		public byte[] skinData; // = null;
+		public string geometryModel; // = null;
+		public string geometryData; // = null;
+
+		public McpePlayerSkin()
+		{
+			Id = 0x5d;
+			IsMcpe = true;
+		}
+
+		protected override void EncodePackage()
+		{
+			base.EncodePackage();
+
+			BeforeEncode();
+
+			Write(uuid);
+			Write(skinId);
+			Write(skinName);
+			Write(serializeName);
+			WriteUnsignedVarInt(skinLength);
+			Write(skinData);
+			Write(geometryModel);
+			Write(geometryData);
+
+			AfterEncode();
+		}
+
+		partial void BeforeEncode();
+		partial void AfterEncode();
+
+		protected override void DecodePackage()
+		{
+			base.DecodePackage();
+
+			BeforeDecode();
+
+			uuid = ReadUUID();
+			skinId = ReadString();
+			skinName = ReadString();
+			serializeName = ReadString();
+			skinLength = ReadUnsignedVarInt();
+			skinData = ReadBytes((int) skinLength);
+			geometryModel = ReadString();
+			geometryData = ReadString();
+
+			AfterDecode();
+		}
+
+		partial void BeforeDecode();
+		partial void AfterDecode();
+
+		protected override void ResetPackage()
+		{
+			base.ResetPackage();
+
+			uuid=default(UUID);
+			skinId=default(string);
+			skinName=default(string);
+			serializeName=default(string);
+			skinLength=default(uint);
+			skinData=default(byte[]);
+			geometryModel=default(string);
+			geometryData=default(string);
 		}
 
 	}
@@ -6542,6 +6758,7 @@ namespace MiNET.Net
 	public partial class McpeInitiateWebSocketConnection : Package<McpeInitiateWebSocketConnection>
 	{
 
+		public string server; // = null;
 
 		public McpeInitiateWebSocketConnection()
 		{
@@ -6555,6 +6772,7 @@ namespace MiNET.Net
 
 			BeforeEncode();
 
+			Write(server);
 
 			AfterEncode();
 		}
@@ -6568,6 +6786,7 @@ namespace MiNET.Net
 
 			BeforeDecode();
 
+			server = ReadString();
 
 			AfterDecode();
 		}
@@ -6579,6 +6798,7 @@ namespace MiNET.Net
 		{
 			base.ResetPackage();
 
+			server=default(string);
 		}
 
 	}
@@ -6586,6 +6806,7 @@ namespace MiNET.Net
 	public partial class McpeSetLastHurtBy : Package<McpeSetLastHurtBy>
 	{
 
+		public int unknown; // = null;
 
 		public McpeSetLastHurtBy()
 		{
@@ -6599,6 +6820,7 @@ namespace MiNET.Net
 
 			BeforeEncode();
 
+			WriteVarInt(unknown);
 
 			AfterEncode();
 		}
@@ -6612,6 +6834,7 @@ namespace MiNET.Net
 
 			BeforeDecode();
 
+			unknown = ReadVarInt();
 
 			AfterDecode();
 		}
@@ -6623,6 +6846,7 @@ namespace MiNET.Net
 		{
 			base.ResetPackage();
 
+			unknown=default(int);
 		}
 
 	}
@@ -6674,6 +6898,10 @@ namespace MiNET.Net
 	public partial class McpeNpcRequest : Package<McpeNpcRequest>
 	{
 
+		public long runtimeEntityId; // = null;
+		public byte unknown0; // = null;
+		public string unknown1; // = null;
+		public byte unknown2; // = null;
 
 		public McpeNpcRequest()
 		{
@@ -6687,6 +6915,10 @@ namespace MiNET.Net
 
 			BeforeEncode();
 
+			WriteUnsignedVarLong(runtimeEntityId);
+			Write(unknown0);
+			Write(unknown1);
+			Write(unknown2);
 
 			AfterEncode();
 		}
@@ -6700,6 +6932,10 @@ namespace MiNET.Net
 
 			BeforeDecode();
 
+			runtimeEntityId = ReadUnsignedVarLong();
+			unknown0 = ReadByte();
+			unknown1 = ReadString();
+			unknown2 = ReadByte();
 
 			AfterDecode();
 		}
@@ -6711,6 +6947,10 @@ namespace MiNET.Net
 		{
 			base.ResetPackage();
 
+			runtimeEntityId=default(long);
+			unknown0=default(byte);
+			unknown1=default(string);
+			unknown2=default(byte);
 		}
 
 	}
@@ -6776,6 +7016,102 @@ namespace MiNET.Net
 		public McpeModalFormResponse()
 		{
 			Id = 0x65;
+			IsMcpe = true;
+		}
+
+		protected override void EncodePackage()
+		{
+			base.EncodePackage();
+
+			BeforeEncode();
+
+			WriteVarInt(formid);
+			Write(data);
+
+			AfterEncode();
+		}
+
+		partial void BeforeEncode();
+		partial void AfterEncode();
+
+		protected override void DecodePackage()
+		{
+			base.DecodePackage();
+
+			BeforeDecode();
+
+			formid = ReadVarInt();
+			data = ReadString();
+
+			AfterDecode();
+		}
+
+		partial void BeforeDecode();
+		partial void AfterDecode();
+
+		protected override void ResetPackage()
+		{
+			base.ResetPackage();
+
+			formid=default(int);
+			data=default(string);
+		}
+
+	}
+
+	public partial class McpeServerSettingsRequest : Package<McpeServerSettingsRequest>
+	{
+
+
+		public McpeServerSettingsRequest()
+		{
+			Id = 0x66;
+			IsMcpe = true;
+		}
+
+		protected override void EncodePackage()
+		{
+			base.EncodePackage();
+
+			BeforeEncode();
+
+
+			AfterEncode();
+		}
+
+		partial void BeforeEncode();
+		partial void AfterEncode();
+
+		protected override void DecodePackage()
+		{
+			base.DecodePackage();
+
+			BeforeDecode();
+
+
+			AfterDecode();
+		}
+
+		partial void BeforeDecode();
+		partial void AfterDecode();
+
+		protected override void ResetPackage()
+		{
+			base.ResetPackage();
+
+		}
+
+	}
+
+	public partial class McpeServerSettingsResponse : Package<McpeServerSettingsResponse>
+	{
+
+		public int formid; // = null;
+		public string data; // = null;
+
+		public McpeServerSettingsResponse()
+		{
+			Id = 0x67;
 			IsMcpe = true;
 		}
 

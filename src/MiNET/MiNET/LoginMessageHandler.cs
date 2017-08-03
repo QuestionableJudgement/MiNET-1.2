@@ -149,6 +149,7 @@ namespace MiNET
 					if (Log.IsDebugEnabled) Log.Debug($"Skin JWT Header: {string.Join(";", headers)}");
 					if (Log.IsDebugEnabled) Log.Debug($"Skin JWT Payload:\n{payload.ToString()}");
 
+					Console.WriteLine(payload);
 					// Skin JWT Payload: 
 
 					//{
@@ -183,6 +184,8 @@ namespace MiNET
 						{
 							SkinType = payload.SkinId,
 							Texture = Convert.FromBase64String((string) payload.SkinData),
+							GeometryType = (string) payload.SkinGeometryName,
+							GeometryData = Encoding.ASCII.GetString(Convert.FromBase64String((string) payload.SkinGeometryData))
 						};
 					}
 					catch (Exception e)
@@ -202,7 +205,6 @@ namespace MiNET
 					JArray chain = json.chain;
 					var chainArray = chain.ToArray();
 					string identityPublicKey = null;
-					CngKey tk = null;
 					foreach (dynamic o in chainArray)
 					{
 						IDictionary<string, dynamic> headers = JWT.Headers(o.ToString());
@@ -250,13 +252,7 @@ namespace MiNET
 
 							// Validate
 							var newKey = CryptoUtils.ImportECDsaCngKeyFromString(certString);
-
-							if (tk == null)
-							{
-								tk = newKey;
-							}
 							CertificateData data = JWT.Decode<CertificateData>(o.ToString(), newKey);
-							Log.Warn(newKey);
 							if (data != null)
 							{
 								identityPublicKey = data.IdentityPublicKey;
@@ -364,7 +360,6 @@ namespace MiNET
 							}, j, JwsAlgorithm.ES384, new Dictionary<string, object> { { "x5u", b64Key } });
 							response.token = jwt;
 
-							Console.WriteLine("Wow encryptboy");
 							_session.SendPackage(response);
 
 							if (Log.IsDebugEnabled) Log.Warn($"Encryption enabled for {_session.Username}");
@@ -529,6 +524,18 @@ namespace MiNET
 		public void HandleMcpeModalFormResponse(McpeModalFormResponse message)
 		{
 		}
+
+		public void HandleMcpePurchaseReceipt(McpePurchaseReceipt message)
+		{
+
+		}
+		public void HandleMcpePlayerSkin(McpePlayerSkin message)
+		{
+
+		}
+
+		public void HandleMcpeModalFormRequest(McpeModalFormRequest message) => throw new NotImplementedException();
+		public void HandleMcpeServerSettingsRequest(McpeServerSettingsRequest message) => throw new NotImplementedException();
 	}
 
 	public interface IServerManager
