@@ -149,7 +149,6 @@ namespace MiNET
 					if (Log.IsDebugEnabled) Log.Debug($"Skin JWT Header: {string.Join(";", headers)}");
 					if (Log.IsDebugEnabled) Log.Debug($"Skin JWT Payload:\n{payload.ToString()}");
 
-					Console.WriteLine(payload);
 					// Skin JWT Payload: 
 
 					//{
@@ -185,7 +184,7 @@ namespace MiNET
 							SkinType = payload.SkinId,
 							Texture = Convert.FromBase64String((string) payload.SkinData),
 							GeometryType = (string) payload.SkinGeometryName,
-							GeometryData = Encoding.ASCII.GetString(Convert.FromBase64String((string) payload.SkinGeometryData))
+							GeometryData = (string) payload.SkinGeometryData
 						};
 					}
 					catch (Exception e)

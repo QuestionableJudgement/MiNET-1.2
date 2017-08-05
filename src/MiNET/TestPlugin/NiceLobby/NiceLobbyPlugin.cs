@@ -51,6 +51,8 @@ using MiNET.Sounds;
 using MiNET.Utils;
 using MiNET.Worlds;
 using TestPlugin.Annotations;
+using MiNET.UI.Forms;
+using MiNET.UI.Elements;
 
 namespace TestPlugin.NiceLobby
 {
@@ -587,6 +589,14 @@ namespace TestPlugin.NiceLobby
 		public Package MessageHandler(McpeText message, Player player)
 		{
 			string text = message.message;
+			if(text == "modal")
+			{
+				var form = new CustomForm("MiNET Form");
+				form.AddElement(new MyToggle("Enable griefing", true));
+				form.AddElement(new Label("Blah blah blah blah " + ChatColors.DarkRed + "blah"));
+				player.OpenForm(form);
+				return null;
+			}
 			if (text.StartsWith("/") || text.StartsWith("."))
 			{
 				return message;

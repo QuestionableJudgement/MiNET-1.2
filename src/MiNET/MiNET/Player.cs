@@ -46,6 +46,8 @@ using MiNET.Utils;
 using MiNET.Worlds;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
+using MiNET.UI.Forms;
+using Newtonsoft.Json.Linq;
 
 namespace MiNET
 {
@@ -78,6 +80,7 @@ namespace MiNET
 		public UUID ClientUuid { get; set; }
 		public string ServerAddress { get; set; }
 		public PlayerInfo PlayerInfo { get; set; }
+		public ConcurrentDictionary<int, IForm> FormsOpened { get; set; } = new ConcurrentDictionary<int, IForm>();
 
 		public Skin Skin { get; set; }
 
@@ -1811,7 +1814,6 @@ namespace MiNET
 					break;
 				case McpeInventoryTransaction.TransactionTypes.ItemUse:
 					var item = transaction.Item;
-
 					if (GameMode != GameMode.Creative && !VerifyItemStack(item))
 					{
 						Log.Warn($"Kicked {Username} for use item hacking.");
@@ -1863,10 +1865,6 @@ namespace MiNET
 							}
 							break;
 					}
-					/*var modal = McpeModalFormRequest.CreateObject();
-					modal.formid = 0;
-					modal.data = "{\"title\": \"Account restore\", \"type\": \"custom_form\", \"content\": [{\"type\": \"label\", \"text\": \"Hello, undrfined!\nAs you might have pointed, we are now using §2Xbox Live§f authorization. If you want to restore your progress, enter your login and password from old server.\nIf you do not have anything to restore, press the cross in the right top corner of this form.\n\n§eWarning!§f Your old account will be wiped.\"}, {\"type\": \"input\", \"placeholder\": \"Login\", \"text\": \"\"}, {\"type\": \"input\", \"placeholder\": \"Password\", \"text\": \"\"}]}";
-					SendPackage(modal);*/
 					break;
 			}
 		}
@@ -2968,11 +2966,6 @@ namespace MiNET
 			Ticked?.Invoke(this, e);
 		}
 
-		public void HandleMcpeModalFormResponse(McpeModalFormResponse message)
-		{
-			Console.WriteLine(message.data + " , " + message.formid);
-		}
-
 		public void HandleMcpePurchaseReceipt(McpePurchaseReceipt message)
 		{
 
@@ -3002,7 +2995,43 @@ namespace MiNET
 				playerList.PutPool();
 			}
 		}
+		public void HandleMcpeModalFormResponse(McpeModalFormResponse message)
+		{
+			var id = message.formid;
+			if (FormsOpened.TryRemove(id, out IForm form))
+			{
+				try
+				{
+					form.Process(this, JArray.Parse(message.data));
+				}
+				catch
+				{
+					// ¯\_(ツ)_/¯
+				}
+			}
+		}
 
+		public void OpenForm(IForm form, bool settings = false)
+		{
+			FormsOpened.AddOrUpdate(0, form, (id, f) =>
+			{
+				return f;
+			});
+			if (settings)
+			{
+				var pk = McpeServerSettingsResponse.CreateObject();
+				pk.data = form.GetData();
+				pk.formid = 0;
+				SendPackage(pk);
+			}
+			else
+			{
+				var pk = McpeModalFormRequest.CreateObject();
+				pk.data = form.GetData();
+				pk.formid = 0;
+				SendPackage(pk);
+			}
+		}
 		public virtual void HandleMcpeServerSettingsRequest(McpeServerSettingsRequest message)
 		{
 		}
