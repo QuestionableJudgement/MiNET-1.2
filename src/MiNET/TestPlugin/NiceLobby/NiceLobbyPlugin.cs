@@ -60,12 +60,7 @@ namespace TestPlugin.NiceLobby
 	public class NiceLobbyPlugin : Plugin
 	{
 		private static readonly ILog Log = LogManager.GetLogger(typeof (NiceLobbyPlugin));
-
-		[UsedImplicitly] private Timer _popupTimer;
-		[UsedImplicitly] private Timer _tickTimer;
-
-		private long _tick = 0;
-
+		
 		protected override void OnEnable()
 		{
 			var server = Context.Server;

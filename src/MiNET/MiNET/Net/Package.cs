@@ -1327,6 +1327,7 @@ namespace MiNET.Net
 				Write(skinType);
 				WriteUnsignedVarInt((uint) skin.Texture.Length);
 				Write(skin.Texture);
+				Write(skin.CapeData ?? "");
 				Write(skin.GeometryType);
 				Write(skin.GeometryData);
 			}

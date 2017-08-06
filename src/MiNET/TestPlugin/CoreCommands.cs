@@ -309,7 +309,6 @@ namespace TestPlugin
 		public void Portal(Player player)
 		{
 			int width = 4;
-			int height = 5;
 
 			int x = (int) player.KnownPosition.X - width/2;
 			int y = (int) player.KnownPosition.Y - 1;
@@ -1031,8 +1030,7 @@ namespace TestPlugin
 				player.SendPackage(transfer);
 			}
 		}
-
-		private byte _invId = 0;
+		
 
 		[Command(Name = "oi")]
 		public void OpenInventory(Player player)

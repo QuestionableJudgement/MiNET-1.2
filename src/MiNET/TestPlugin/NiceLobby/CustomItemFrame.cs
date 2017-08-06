@@ -101,8 +101,6 @@ namespace TestPlugin.NiceLobby
 
 			return true;
 		}
-
-		private int _frame = 0;
 		
 		private object _tickSync = new object();
 

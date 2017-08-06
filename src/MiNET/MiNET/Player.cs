@@ -48,6 +48,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using MiNET.UI.Forms;
 using Newtonsoft.Json.Linq;
+using System.Text;
 
 namespace MiNET
 {
@@ -1794,17 +1795,70 @@ namespace MiNET
 					Log.Warn("EntityId: " + transaction.EntityId);
 					Log.Warn("Item: " + transaction.Item);
 					Log.Warn("Slot: " + transaction.Slot);
+					foreach (var trs in transaction.Transactions)
+					{
+						Log.Warn("__");
+						Log.Warn("NewItem: " + trs.NewItem);
+						Log.Warn("OldItem: " + trs.OldItem);
+						Log.Warn("Slot: " + trs.Slot);
+					}
 					var tr = transaction.Transactions[0];
-					Log.Warn("__");
-					Log.Warn("NewItem: " + tr.NewItem);
-					Log.Warn("OldItem: " + tr.OldItem);
-					Log.Warn("Slot: " + tr.Slot);
 					Inventory.Slots[tr.Slot] = tr.NewItem;
 					SendPlayerInventory();
 					break;
+				case McpeInventoryTransaction.TransactionTypes.ItemUseOnEntity:
+					var target = Level.GetEntity(transaction.EntityId);
+
+					if (target == null) return;
+
+					switch ((McpeInventoryTransaction.ItemUseOnEntityAction)transaction.ActionType)
+					{
+						case McpeInventoryTransaction.ItemUseOnEntityAction.Interact:
+							{
+								DoInteraction(transaction.ActionType, this);
+								target.DoInteraction(transaction.ActionType, this);
+								break;
+							}
+						case McpeInventoryTransaction.ItemUseOnEntityAction.Attack:
+							{
+								LastAttackTarget = target;
+
+								var player = target as Player;
+								if (player != null)
+								{
+									var damage = DamageCalculator.CalculateItemDamage(this, itemInHand, player);
+
+									if (IsFalling)
+									{
+										damage += DamageCalculator.CalculateFallDamage(this, damage, player);
+									}
+
+									damage += DamageCalculator.CalculateEffectDamage(this, damage, player);
+
+									if (damage < 0) damage = 0;
+
+									damage += DamageCalculator.CalculateDamageIncreaseFromEnchantments(this, itemInHand, player);
+
+									player.HealthManager.TakeHit(this, itemInHand, (int)DamageCalculator.CalculatePlayerDamage(this, player, itemInHand, damage, DamageCause.EntityAttack), DamageCause.EntityAttack);
+									var fireAspectLevel = itemInHand.GetEnchantingLevel(EnchantingType.FireAspect);
+									if (fireAspectLevel > 0)
+									{
+										player.HealthManager.Ignite(fireAspectLevel * 80);
+									}
+								}
+								else
+								{
+									// This is totally wrong. Need to merge with the above damage calculation
+									target.HealthManager.TakeHit(this, itemInHand, CalculateDamage(target), DamageCause.EntityAttack);
+								}
+
+								HungerManager.IncreaseExhaustion(0.3f);
+								break;
+							}
+					}
+					break;
 				case McpeInventoryTransaction.TransactionTypes.ItemRelease:
 					if (_itemUseTimer <= 0) return;
-
 
 					if (itemInHand == null) return; // Cheat(?)
 
@@ -1814,7 +1868,7 @@ namespace MiNET
 					break;
 				case McpeInventoryTransaction.TransactionTypes.ItemUse:
 					var item = transaction.Item;
-					if (GameMode != GameMode.Creative && !VerifyItemStack(item))
+					if (GameMode != GameMode.Creative && (!VerifyItemStack(item) || !CheckItemsClient(itemInHand, item)))
 					{
 						Log.Warn($"Kicked {Username} for use item hacking.");
 						Disconnect("Error #324. Please report this error.");
@@ -1826,7 +1880,7 @@ namespace MiNET
 						return;  // Cheat(?)
 					}
 
-					switch ((McpeInventoryTransaction.ItemUseAction) transaction.ActionType)
+					switch ((McpeInventoryTransaction.ItemUseAction)transaction.ActionType)
 					{
 						case McpeInventoryTransaction.ItemUseAction.Destroy:
 							Level.BreakBlock(this, transaction.Position);
@@ -1867,6 +1921,12 @@ namespace MiNET
 					}
 					break;
 			}
+		}
+
+		public virtual bool CheckItemsClient(Item serverSide, Item clientSide)
+		{
+			return serverSide.Id == clientSide.Id && serverSide.Metadata == serverSide.Metadata &&
+				serverSide.ExtraData.Equals(clientSide.ExtraData);
 		}
 
 		/// <summary>
@@ -2645,7 +2705,7 @@ namespace MiNET
 			var metadata = base.GetMetadata();
 			metadata[4] = new MetadataString(NameTag ?? Username);
 			metadata[40] = new MetadataString(ButtonText ?? string.Empty);
-			
+
 			//MetadataDictionary metadata = new MetadataDictionary();
 			//metadata[0] = new MetadataLong(GetDataValue()); // 10000000000000011000000000000000
 			//metadata[1] = new MetadataInt(1);
@@ -2978,7 +3038,7 @@ namespace MiNET
 				SkinType = message.skinName,
 				Texture = message.skinData,
 				GeometryType = message.geometryModel,
-				GeometryData = message.geometryData,
+				GeometryData = message.geometryData
 			};
 			{
 				McpePlayerList playerList = McpePlayerList.CreateObject();
