@@ -4669,6 +4669,14 @@ namespace MiNET.Net
 
 	public partial class McpeAdventureSettings : Package<McpeAdventureSettings>
 	{
+		public enum Flags
+		{
+			Mayfly = 0x40,
+			Noclip = 0x80,
+			Muted = 0x400,
+			Worldbuilder = 0x100,
+			Flying = 0x200,
+		}
 		public enum Permissions
 		{
 			Normal = 0,
@@ -4677,9 +4685,31 @@ namespace MiNET.Net
 			Automation = 3,
 			Admin = 4,
 		}
+		public enum Permissionlevels
+		{
+			Visitor = 0,
+			Member = 1,
+			Operator = 2,
+			Custom = 3,
+		}
+		public enum Actionpermissions
+		{
+			Build = 0x1,
+			Doors = 0x2,
+			Containers = 0x4,
+			Attackplayers = 0x8,
+			Attackmobs = 0x10,
+			Operator = 0x20,
+			Teleport = 0x80,
+			Default = (Build | Doors | Containers | Attackplayers | Attackmobs ),
+			All = (Build | Doors | Containers | Attackplayers | Attackmobs | Operator | Teleport),
+		}
 
 		public uint flags; // = null;
 		public uint userPermission; // = null;
+		public uint actionPermissions; // = null;
+		public uint permissionLevel; // = null;
+		public long userId; // = null;
 
 		public McpeAdventureSettings()
 		{
@@ -4695,6 +4725,9 @@ namespace MiNET.Net
 
 			WriteUnsignedVarInt(flags);
 			WriteUnsignedVarInt(userPermission);
+			WriteUnsignedVarInt(actionPermissions);
+			WriteUnsignedVarInt(permissionLevel);
+			WriteSignedVarLong(userId);
 
 			AfterEncode();
 		}
@@ -4710,6 +4743,9 @@ namespace MiNET.Net
 
 			flags = ReadUnsignedVarInt();
 			userPermission = ReadUnsignedVarInt();
+			actionPermissions = ReadUnsignedVarInt();
+			permissionLevel = ReadUnsignedVarInt();
+			userId = ReadSignedVarLong();
 
 			AfterDecode();
 		}
@@ -4723,6 +4759,9 @@ namespace MiNET.Net
 
 			flags=default(uint);
 			userPermission=default(uint);
+			actionPermissions=default(uint);
+			permissionLevel=default(uint);
+			userId=default(long);
 		}
 
 	}

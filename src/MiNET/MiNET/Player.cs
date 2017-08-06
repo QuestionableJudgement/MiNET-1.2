@@ -500,7 +500,7 @@ namespace MiNET
 
 		public virtual void SendAdventureSettings()
 		{
-			McpeAdventureSettings mcpeAdventureSettings = McpeAdventureSettings.CreateObject();
+			var mcpeAdventureSettings = McpeAdventureSettings.CreateObject();
 
 			uint flags = 0;
 
@@ -511,17 +511,20 @@ namespace MiNET
 
 			if (IsAutoJump) flags |= 0x20;
 
-			if (AllowFly || GameMode == GameMode.Creative) flags |= 0x40;
+			if (AllowFly || GameMode == GameMode.Creative) flags |= (uint) McpeAdventureSettings.Flags.Mayfly;
 
-			if (IsNoClip || IsSpectator || GameMode == GameMode.Spectator) flags |= 0x80; // No clip
+			if (IsNoClip || IsSpectator || GameMode == GameMode.Spectator) flags |= (uint) McpeAdventureSettings.Flags.Noclip;
 
-			if (IsWorldBuilder) flags |= 0x100; // Worldbuilder
+			if (IsWorldBuilder) flags |= (uint)McpeAdventureSettings.Flags.Worldbuilder;
 
-			if (IsFlying) flags |= 0x200;
-			if (IsMuted) flags |= 0x400; // Mute
+			if (IsFlying) flags |= (uint)McpeAdventureSettings.Flags.Flying;
+			if (IsMuted) flags |= (uint)McpeAdventureSettings.Flags.Muted;
 
 			mcpeAdventureSettings.flags = flags;
 			mcpeAdventureSettings.userPermission = (uint)PermissionLevel;
+			mcpeAdventureSettings.permissionLevel = 1;
+			mcpeAdventureSettings.actionPermissions = (uint) McpeAdventureSettings.Actionpermissions.Default;
+			mcpeAdventureSettings.userId = (EntityId & 1) == 1 ? ((EntityId + 1) >> 1) * -1 : EntityId >> 1;
 
 			SendPackage(mcpeAdventureSettings);
 		}

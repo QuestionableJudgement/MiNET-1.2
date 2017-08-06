@@ -1246,6 +1246,16 @@ Wiki: [Adventure Settings](https://github.com/NiclasOlofsson/MiNET/wiki//Protoco
 
 
 
+#### Flags constants
+
+| Name | Value |
+|:-----|:-----|
+|Mayfly | 0x40 |
+|Noclip | 0x80 |
+|Muted | 0x400 |
+|Worldbuilder | 0x100 |
+|Flying | 0x200 |
+
 #### Permissions constants
 
 | Name | Value |
@@ -1256,6 +1266,29 @@ Wiki: [Adventure Settings](https://github.com/NiclasOlofsson/MiNET/wiki//Protoco
 |Automation | 3 |
 |Admin | 4 |
 
+#### Permissionlevels constants
+
+| Name | Value |
+|:-----|:-----|
+|Visitor | 0 |
+|Member | 1 |
+|Operator | 2 |
+|Custom | 3 |
+
+#### Actionpermissions constants
+
+| Name | Value |
+|:-----|:-----|
+|Build | 0x1 |
+|Doors | 0x2 |
+|Containers | 0x4 |
+|Attackplayers | 0x8 |
+|Attackmobs | 0x10 |
+|Operator | 0x20 |
+|Teleport | 0x80 |
+|Default | (Build | Doors | Containers | Attackplayers | Attackmobs ) |
+|All | (Build | Doors | Containers | Attackplayers | Attackmobs | Operator | Teleport) |
+
 
 #### Fields
 
@@ -1263,6 +1296,9 @@ Wiki: [Adventure Settings](https://github.com/NiclasOlofsson/MiNET/wiki//Protoco
 |:-----|:-----|:-----|
 |Flags | UnsignedVarInt |  |
 |User Permission | UnsignedVarInt |  |
+|Action Permissions | UnsignedVarInt |  |
+|Permission Level | UnsignedVarInt |  |
+|User Id | SignedVarLong |  |
 -----------------------------------------------------------------------
 ### Block Entity Data (0x38)
 Wiki: [Block Entity Data](https://github.com/NiclasOlofsson/MiNET/wiki//Protocol-BlockEntityData)
