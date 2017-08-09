@@ -183,6 +183,7 @@ namespace MiNET
 						{
 							SkinType = payload.SkinId,
 							Texture = Convert.FromBase64String((string) payload.SkinData),
+//							CapeData = (string) payload.CapeData,
 							GeometryType = (string) payload.SkinGeometryName,
 							GeometryData = (string) payload.SkinGeometryData
 						};
@@ -220,6 +221,44 @@ namespace MiNET
 						// x5u cert (string): MHYwEAYHKoZIzj0CAQYFK4EEACIDYgAE8ELkixyLcwlZryUQcu1TvPOmI2B7vX83ndnWRUaXm74wFfa5f/lwQNTfrLVHa2PmenpGI6JhIMUJaWZrjmMj90NoKNFSNBuKdm8rYiXsfaz3K36x/1U26HpG0ZxK/V1V
 						if (headers.ContainsKey("x5u"))
 						{
+							#if MONO
+							string certString = headers["x5u"];
+							CertificateData data;
+
+							data = Newtonsoft.Json.JsonConvert.DeserializeObject<CertificateData> (JWT.Payload(o.ToString()));
+
+                        	if (data != null)
+                        	{
+                        		if (Log.IsDebugEnabled) Log.Debug("Decoded token success");
+
+                        		if (CertificateData.MojangRootKey.Equals(certString, StringComparison.InvariantCultureIgnoreCase))
+                        		{
+                        			Log.Debug("Got Mojang key. Is valid = " + data.CertificateAuthority);
+                        			validationKey = data.IdentityPublicKey;
+                        		}
+                        		else if (validationKey != null && validationKey.Equals(certString, StringComparison.InvariantCultureIgnoreCase))
+                        		{
+                        			_playerInfo.CertificateData = data;
+                        		}
+                        		else
+                        		{
+                        			if (data.ExtraData == null) continue;
+
+                        			// Self signed, make sure they don't fake XUID
+                        			if (data.ExtraData.Xuid != null)
+                        			{
+                        				Log.Warn("Received fake XUID from " + data.ExtraData.DisplayName);
+                        				data.ExtraData.Xuid = null;
+                        			}
+
+                        			_playerInfo.CertificateData = data;
+                        		}
+                        	}
+                        	else
+                        	{
+                        		Log.Error("Not a valid Identity Public Key for decoding");
+                        	}
+							#else
 							string certString = headers["x5u"];
 							if (identityPublicKey == null && CertificateData.MojangRootKey.Equals(certString, StringComparison.InvariantCultureIgnoreCase))
 							{
@@ -285,6 +324,7 @@ namespace MiNET
 							{
 								Log.Error("Not a valid Identity Public Key for decoding");
 							}
+							#endif
 						}
 					}
 
@@ -303,6 +343,7 @@ namespace MiNET
 							UseEncryption = Config.GetProperty("UseEncryptionForAll", false) || (Config.GetProperty("UseEncryption", true) && !string.IsNullOrWhiteSpace(_playerInfo.CertificateData.ExtraData.Xuid)),
 						};
 
+						#if !MONO
 						if (_session.CryptoContext.UseEncryption)
 						{
 							ECDiffieHellmanPublicKey publicKey = CryptoUtils.CreateEcDiffieHellmanPublicKey(_playerInfo.CertificateData.IdentityPublicKey);
@@ -363,6 +404,7 @@ namespace MiNET
 
 							if (Log.IsDebugEnabled) Log.Warn($"Encryption enabled for {_session.Username}");
 						}
+						#endif
 					}
 				}
 
