@@ -1,11 +1,14 @@
-﻿using Newtonsoft.Json.Linq;
+﻿using System;
+using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
-using MiNET.UI.Elements;
+using log4net;
+using Button = MiNET.UI.Elements.Button;
 
 namespace MiNET.UI.Forms
 {
 	public class ButtonsForm : IForm
 	{
+		protected static readonly ILog Log = LogManager.GetLogger(typeof (ButtonsForm));
 		public string Title { get; set; }
 		public string Content { get; set; }
 		public List<Button> Buttons { get; set; }
@@ -24,34 +27,36 @@ namespace MiNET.UI.Forms
 			{
 				{ "type", "form" },
 				{ "title", Title },
-				{ "content", Content }
+				{ "content", Content },
+				{ "buttons", buttons }
 			};
-			if(buttons.Count > 0)
-			{
-				j.Add("button1", buttons[0]);
-			}
-			if(buttons.Count > 1)
-			{
-				j.Add("button2", buttons[1]);
-			}
 			return j.ToString(Newtonsoft.Json.Formatting.None);
 		}
 
+		public void AddButton(Button button)
+		{
+			Buttons.Add(button);
+		}
+		
 		public JArray GetButtons()
 		{
 			var j = new JArray();
 			foreach(var button in Buttons)
 			{
-				j.Add(button);
+				j.Add(button.GetData());
 			}
 			return j;
 		}
 
-		public void Process(Player player, JArray response)
+		public virtual void Process(Player player, string response)
 		{
-			for (var i = 0; i < response.Count; i++)
+			try
 			{
-				Buttons[i].Process(player, response[i]);
+				Buttons[int.Parse(response)].Process(player, response);
+			}
+			catch(Exception e)
+			{
+				Log.Error(e);
 			}
 		}
 	}

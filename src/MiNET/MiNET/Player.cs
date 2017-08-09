@@ -3065,7 +3065,7 @@ namespace MiNET
 			{
 				try
 				{
-					form.Process(this, JArray.Parse(message.data));
+					form.Process(this, message.data);
 				}
 				catch
 				{
@@ -3074,9 +3074,11 @@ namespace MiNET
 			}
 		}
 
+		private int formid;
 		public void OpenForm(IForm form, bool settings = false)
 		{
-			FormsOpened.AddOrUpdate(0, form, (id, f) =>
+			int fid = formid++;
+			FormsOpened.AddOrUpdate(fid, form, (id, f) =>
 			{
 				return f;
 			});
@@ -3084,14 +3086,14 @@ namespace MiNET
 			{
 				var pk = McpeServerSettingsResponse.CreateObject();
 				pk.data = form.GetData();
-				pk.formid = 0;
+				pk.formid = fid;
 				SendPackage(pk);
 			}
 			else
 			{
 				var pk = McpeModalFormRequest.CreateObject();
 				pk.data = form.GetData();
-				pk.formid = 0;
+				pk.formid = fid;
 				SendPackage(pk);
 			}
 		}

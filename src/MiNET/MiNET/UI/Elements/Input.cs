@@ -3,17 +3,17 @@ using Newtonsoft.Json.Linq;
 
 namespace MiNET.UI.Elements
 {
-	public abstract class Input : IElement
+	public class Input : IElement
 	{
 		public string Text { get; set; }
 		public string Placeholder { get; set; }
 		public string Default { get; set; }
 
-		public Input(string placeholder = "", string defaultText = "", string text = "")
+		public Input(string text = "", string placeholder = "", string defaultText = "")
 		{
 			Text = text;
-			Default = defaultText;
 			Placeholder = placeholder;
+			Default = defaultText;
 		}
 		public JObject GetData()
 		{
@@ -27,6 +27,8 @@ namespace MiNET.UI.Elements
 			return j;
 		}
 
-		public abstract void Process(Player player, object value);
+		public virtual void Process(Player player, object value)
+		{
+		}
 	}
 }

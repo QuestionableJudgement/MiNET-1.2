@@ -41,7 +41,7 @@ namespace MiNET.UI.Forms
 			return j;
 		}
 
-		public void Process(Player player, JArray response)
+		public void Process(Player player, string response)
 		{
 
 		}

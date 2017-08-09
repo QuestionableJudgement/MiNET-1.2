@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace MiNET.UI.Elements
 {
-	public abstract class StepSlider : IElement
+	public class StepSlider : IElement
 	{
 		public string Text { get; set; }
 		public List<string> Steps { get; set; }
@@ -39,6 +39,8 @@ namespace MiNET.UI.Elements
 			return j;
 		}
 
-		public abstract void Process(Player player, object value);
+		public virtual void Process(Player player, object value)
+		{
+		}
 	}
 }

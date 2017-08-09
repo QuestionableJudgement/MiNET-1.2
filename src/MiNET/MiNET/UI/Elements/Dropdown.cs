@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace MiNET.UI.Elements
 {
-	public abstract class Dropdown : IElement
+	public class Dropdown : IElement
 	{
 		public string Text { get; set; }
 		public List<string> Options { get; set; }
@@ -36,6 +36,8 @@ namespace MiNET.UI.Elements
 			return j;
 		}
 
-		public abstract void Process(Player player, object value);
+		public virtual void Process(Player player, object value)
+		{
+		}
 	}
 }

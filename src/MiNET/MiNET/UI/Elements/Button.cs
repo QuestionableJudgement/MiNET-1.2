@@ -1,10 +1,8 @@
-﻿using System;
-using MiNET;
-using Newtonsoft.Json.Linq;
+﻿using Newtonsoft.Json.Linq;
 
 namespace MiNET.UI.Elements
 {
-	abstract public class Button : IElement
+	public abstract class Button : IElement
 	{
 		public string Text { get; set; }
 		public string Image { get; set; }

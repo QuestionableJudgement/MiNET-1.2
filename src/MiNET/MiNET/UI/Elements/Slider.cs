@@ -3,7 +3,7 @@ using Newtonsoft.Json.Linq;
 
 namespace MiNET.UI.Elements
 {
-	public abstract class Slider : IElement
+	public class Slider : IElement
 	{
 		public string Text { get; set; }
 		public float Min { get; set; }
@@ -35,6 +35,8 @@ namespace MiNET.UI.Elements
 			return j;
 		}
 
-		public abstract void Process(Player player, object value);
+		public virtual void Process(Player player, object value)
+		{
+		}
 	}
 }

@@ -2,11 +2,14 @@
 using Newtonsoft.Json.Linq;
 using MiNET.UI.Elements;
 using System.Collections.Generic;
+using log4net;
 
 namespace MiNET.UI.Forms
 {
 	public class CustomForm : IForm
 	{
+		protected static readonly ILog Log = LogManager.GetLogger(typeof (CustomForm));
+		
 		public List<IElement> Elements { get; set; }
 		public string Title { get; set; }
 
@@ -43,12 +46,20 @@ namespace MiNET.UI.Forms
 			};
 			return j.ToString(Newtonsoft.Json.Formatting.None);
 		}
-		public void Process(Player player, JArray response)
+		public virtual void Process(Player player, string response)
 		{
-			for(var i = 0; i < response.Count; i++)
+			try
 			{
-				Console.WriteLine(response[i]);
-				Elements[i].Process(player, response[i]);
+				JArray array = JArray.Parse(response);
+				player.SendMessage("ButtonsForm response");
+				for(var i = 0; i < array.Count; i++)
+				{
+					Elements[i].Process(player, array[i]);
+				}
+			}
+			catch(Exception e)
+			{
+				Log.Error(e);
 			}
 		}
 	}
