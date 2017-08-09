@@ -7,6 +7,9 @@ namespace MiNET.Net
 		public const byte TypeTranslation = 2;
 		public const byte TypePopup = 3;
 		public const byte TypeTip = 4;
+		public const byte TypeSystem = 5;
+		public const byte TypeWhisper = 6;
+		public const byte TypeAnnouncement = 7;
 
 		public string source; // = null;
 		public string message; // = null;
@@ -17,10 +20,13 @@ namespace MiNET.Net
 			switch (type)
 			{
 				case TypeChat:
+				case TypeWhisper:
+				case TypeAnnouncement:
 					Write(source);
 					Write(message);
 					break;
 				case TypeRaw:
+				case TypeSystem:
 					Write(message);
 					break;
 				case TypePopup:

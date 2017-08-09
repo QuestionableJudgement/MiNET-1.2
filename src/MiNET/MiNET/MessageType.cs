@@ -6,7 +6,10 @@ namespace MiNET
 		Chat = 1,
 		Translation = 2,
 		Popup = 3,
-		Tip = 4
+		Tip = 4,
+		SystemMessage = 5,
+		Whisper = 6,
+		Announcement = 7
 	}
 
 	public enum TitleType
