@@ -162,7 +162,7 @@ namespace MiNET
 				if (ServerRole == ServerRole.Full || ServerRole == ServerRole.Node)
 				{
 					Log.Info("Loading plugins...");
-					PluginManager = new PluginManager();
+					PluginManager = PluginManager ?? new PluginManager();
 					PluginManager.LoadPlugins();
 					Log.Info("Plugins loaded!");
 
@@ -177,8 +177,7 @@ namespace MiNET
 
 					PluginManager.EnablePlugins(this, LevelManager);
 
-					// Cache - remove
-					LevelManager.GetLevel(null, Dimension.Overworld.ToString());
+					LevelManager.Init();
 				}
 
 				GreylistManager = GreylistManager ?? new GreylistManager(this);
@@ -610,13 +609,7 @@ namespace MiNET
 					_playerSessions.TryRemove(senderEndpoint, out session);
 				}
 
-				session = new PlayerNetworkSession(this, null, senderEndpoint, incoming.mtuSize)
-				{
-					State = ConnectionState.Connecting,
-					LastUpdatedTime = DateTime.UtcNow,
-					MtuSize = incoming.mtuSize,
-					NetworkIdentifier = incoming.clientGuid
-				};
+				session = ServerManager.GetServer().CreateNetworkSession(senderEndpoint, incoming.mtuSize, incoming.clientGuid);
 
 				_playerSessions.TryAdd(senderEndpoint, session);
 			}
@@ -625,7 +618,7 @@ namespace MiNET
 			//player.ClientGuid = incoming.clientGuid;
 			//player.NetworkHandler = session;
 			//session.Player = player;
-			session.MessageHandler = new LoginMessageHandler(session);
+			session.MessageHandler = ServerManager.GetServer().CreateLoginHandler(session);
 
 			var reply = OpenConnectionReply2.CreateObject();
 			reply.serverGuid = 12345;
