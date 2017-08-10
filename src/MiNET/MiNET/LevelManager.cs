@@ -247,12 +247,5 @@ namespace MiNET
 
 			return level;
 		}
-
-		public event EventHandler<LevelEventArgs> LevelCreated;
-
-		protected virtual void OnLevelCreated(LevelEventArgs e)
-		{
-			LevelCreated?.Invoke(this, e);
-		}
 	}
 }

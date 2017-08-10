@@ -118,7 +118,7 @@ namespace MiNET.Worlds
 		public Level TheEndLevel { get; set; }
 		public Level OverworldLevel { get; set; }
 
-		public void Initialize()
+		public virtual void Initialize()
 		{
 			//IsWorldTimeStarted = false;
 			WorldProvider.Initialize();
@@ -1115,7 +1115,7 @@ namespace MiNET.Worlds
 			return !e.Cancel;
 		}
 
-		public void Interact(Player player, Item itemInHand, BlockCoordinates blockCoordinates, BlockFace face, Vector3 faceCoords)
+		public virtual void Interact(Player player, Item itemInHand, BlockCoordinates blockCoordinates, BlockFace face, Vector3 faceCoords)
 		{
 			Block target = GetBlock(blockCoordinates);
 			if (target.Interact(this, player, blockCoordinates, face, faceCoords)) return; // Handled in block interaction
@@ -1156,7 +1156,7 @@ namespace MiNET.Worlds
 			return !e.Cancel;
 		}
 
-		public void BreakBlock(Player player, BlockCoordinates blockCoordinates)
+		public virtual void BreakBlock(Player player, BlockCoordinates blockCoordinates)
 		{
 			Block block = GetBlock(blockCoordinates);
 			BlockEntity blockEntity = GetBlockEntity(blockCoordinates);
@@ -1179,7 +1179,7 @@ namespace MiNET.Worlds
 			}
 		}
 
-	    private static void RevertBlockAction(Player player, Block block, BlockEntity blockEntity)
+	    protected static void RevertBlockAction(Player player, Block block, BlockEntity blockEntity)
 	    {
 	        //var message = McpeUpdateBlock.CreateObject();
 	        //message.blockId = block.Id;

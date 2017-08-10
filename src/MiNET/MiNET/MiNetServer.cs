@@ -78,8 +78,8 @@ namespace MiNET
 
 		public bool ForceOrderingForAll { get; set; }
 
-		internal static DedicatedThreadPool FastThreadPool { get; set; }
-		internal static DedicatedThreadPool LevelThreadPool { get; set; }
+		public static DedicatedThreadPool FastThreadPool { get; set; }
+		public static DedicatedThreadPool LevelThreadPool { get; set; }
 
 		public MiNetServer()
 		{

@@ -205,7 +205,7 @@ namespace MiNET
 			Entity.BroadcastSetEntityData();
 		}
 
-		private object _killSync = new object();
+		protected object _killSync = new object();
 
 		public virtual void Kill()
 		{
@@ -266,7 +266,7 @@ namespace MiNET
 			}
 		}
 
-		private async Task SendWithDelay(int delay, Action action)
+		protected async Task SendWithDelay(int delay, Action action)
 		{
 			await Task.Delay(delay);
 			action();

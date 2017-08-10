@@ -87,7 +87,7 @@ namespace MiNET.Entities
 			Level?.RelayBroadcast(bossEvent);
 		}
 
-		private void SendAttributes()
+		protected void SendAttributes()
 		{
 			if (Progress == 0) Progress = 1;
 

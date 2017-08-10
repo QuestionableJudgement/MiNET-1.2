@@ -43,10 +43,10 @@ namespace MiNET
 	{
 		private static readonly ILog Log = LogManager.GetLogger(typeof (LoginMessageHandler));
 
-		private readonly PlayerNetworkSession _session;
+		protected readonly PlayerNetworkSession _session;
 
 		private object _loginSyncLock = new object();
-		private PlayerInfo _playerInfo = new PlayerInfo();
+		protected PlayerInfo _playerInfo = new PlayerInfo();
 
 		public LoginMessageHandler(PlayerNetworkSession session)
 		{
@@ -425,7 +425,7 @@ namespace MiNET
 			return Encoding.UTF8.GetString(Base64Url.Decode(input));
 		}
 
-		public void HandleMcpeClientToServerHandshake(McpeClientToServerHandshake message)
+		public virtual void HandleMcpeClientToServerHandshake(McpeClientToServerHandshake message)
 		{
 			IServerManager serverManager = _session.Server.ServerManager;
 			IServer server = serverManager.GetServer();
