@@ -4727,7 +4727,7 @@ namespace MiNET.Net
 			WriteUnsignedVarInt(userPermission);
 			WriteUnsignedVarInt(actionPermissions);
 			WriteUnsignedVarInt(permissionLevel);
-			WriteSignedVarLong(userId);
+			Write(userId);
 
 			AfterEncode();
 		}
@@ -4745,7 +4745,7 @@ namespace MiNET.Net
 			userPermission = ReadUnsignedVarInt();
 			actionPermissions = ReadUnsignedVarInt();
 			permissionLevel = ReadUnsignedVarInt();
-			userId = ReadSignedVarLong();
+			userId = ReadLong();
 
 			AfterDecode();
 		}
