@@ -445,7 +445,7 @@ namespace MiNET.Net
 					WriteSignedVarLong(record.EntityId);
 					Write(record.DisplayName ?? record.Username);
 					Write(record.Skin);
-					Write(record.CertificateData.ExtraData.Xuid);
+					Write(record.CertificateData?.ExtraData.Xuid);
 				}
 			}
 			else if (records is PlayerRemoveRecords)
