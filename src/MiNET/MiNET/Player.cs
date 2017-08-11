@@ -1407,7 +1407,7 @@ namespace MiNET
 
 		protected object _disconnectSync = new object();
 
-		private bool _haveJoined = false;
+		protected bool _haveJoined = false;
 
 		public virtual void Disconnect(string reason, bool sendDisconnect = true)
 		{
@@ -3081,11 +3081,9 @@ namespace MiNET
 			}
 		}
 
-		private int formid;
 		public void OpenForm(IForm form, bool settings = false)
 		{
-			int fid = formid++;
-			FormsOpened.AddOrUpdate(fid, form, (id, f) =>
+			FormsOpened.AddOrUpdate(0, form, (id, f) =>
 			{
 				return f;
 			});
@@ -3093,14 +3091,14 @@ namespace MiNET
 			{
 				var pk = McpeServerSettingsResponse.CreateObject();
 				pk.data = form.GetData();
-				pk.formid = fid;
+				pk.formid = 0;
 				SendPackage(pk);
 			}
 			else
 			{
 				var pk = McpeModalFormRequest.CreateObject();
 				pk.data = form.GetData();
-				pk.formid = fid;
+				pk.formid = 0;
 				SendPackage(pk);
 			}
 		}
