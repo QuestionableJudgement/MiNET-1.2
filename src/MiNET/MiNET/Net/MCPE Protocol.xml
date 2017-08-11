@@ -414,6 +414,16 @@
 			<enum id="Creative" value="3" />
 			<enum id="Crafting" value="99999" />
 		</enums>
+		<enums id="Normal actions">
+			<enum id="Put slot" value="3" />
+			<enum id="Get slot" value="5" />
+			<enum id="Get result" value="7" />
+			<enum id="Craft use" value="9" />
+			<enum id="Enchant item" value="29" />
+			<enum id="Enchant lapis" value="31" />
+			<enum id="Enchant result" value="33" />
+			<enum id="Drop" value="199" />
+		</enums>
 		<enums id="Item release actions">
 			<enum id="Release" value="0" />
 			<enum id="Use" value="1" />

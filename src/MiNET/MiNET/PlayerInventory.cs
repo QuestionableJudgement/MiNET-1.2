@@ -27,6 +27,9 @@ namespace MiNET
 		public Item Chest { get; set; }
 		public Item Helmet { get; set; }
 
+		public Item Cursor { get; set; }
+		public Item Offhand { get; set; }
+
 		public PlayerInventory(Player player)
 		{
 			Player = player;

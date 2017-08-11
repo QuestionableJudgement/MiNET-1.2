@@ -511,9 +511,9 @@ namespace MiNET
 
 			if (IsAutoJump) flags |= 0x20;
 
-			if (AllowFly || GameMode == GameMode.Creative) flags |= (uint) McpeAdventureSettings.Flags.Mayfly;
+			if (AllowFly || GameMode == GameMode.Creative) flags |= (uint)McpeAdventureSettings.Flags.Mayfly;
 
-			if (IsNoClip || IsSpectator || GameMode == GameMode.Spectator) flags |= (uint) McpeAdventureSettings.Flags.Noclip;
+			if (IsNoClip || IsSpectator || GameMode == GameMode.Spectator) flags |= (uint)McpeAdventureSettings.Flags.Noclip;
 
 			if (IsWorldBuilder) flags |= (uint)McpeAdventureSettings.Flags.Worldbuilder;
 
@@ -523,7 +523,7 @@ namespace MiNET
 			mcpeAdventureSettings.flags = flags;
 			mcpeAdventureSettings.userPermission = (uint)PermissionLevel;
 			mcpeAdventureSettings.permissionLevel = 1;
-			mcpeAdventureSettings.actionPermissions = (uint) McpeAdventureSettings.Actionpermissions.Default;
+			mcpeAdventureSettings.actionPermissions = (uint)McpeAdventureSettings.Actionpermissions.Default;
 			mcpeAdventureSettings.userId = (EntityId & 1) == 1 ? ((EntityId + 1) >> 1) * -1 : EntityId >> 1;
 
 			SendPackage(mcpeAdventureSettings);
@@ -1608,34 +1608,6 @@ namespace MiNET
 			Log.Warn($"Player {Username} drops item frame at {message.coordinates}");
 		}
 
-		//public virtual void HandleMcpeDropItem(McpeDropItem message)
-		//{
-		//	lock (Inventory)
-		//	{
-		//		Item droppedItem = message.item;
-		//		if (Log.IsDebugEnabled) Log.Debug($"Player {Username} drops item {droppedItem} with inv slot {message.itemtype}");
-
-		//		if (droppedItem.Count == 0) return; // 0.15 bug
-
-		//		if (!VerifyItemStack(droppedItem)) return;
-
-		//		// Clear current inventory slot.
-
-		//		ItemEntity itemEntity = new ItemEntity(Level, droppedItem)
-		//		{
-		//			Velocity = KnownPosition.GetDirection()*0.7f,
-		//			KnownPosition =
-		//			{
-		//				X = KnownPosition.X,
-		//				Y = KnownPosition.Y + 1.62f,
-		//				Z = KnownPosition.Z
-		//			},
-		//		};
-
-		//		itemEntity.SpawnEntity();
-		//	}
-		//}
-
 		public virtual void HandleMcpeMobEquipment(McpeMobEquipment message)
 		{
 			if (HealthManager.IsDead) return;
@@ -1786,35 +1758,110 @@ namespace MiNET
 		{
 			Log.Debug($"Player {Username} crafted item on window 0x{message.windowId:X2} on type: {message.recipeType}");
 		}
+		
+		public virtual void ProcessNormalTransaction(McpeInventoryTransaction message)
+		{
+			// The code below is shit
+			var transaction = message.transaction;
+			var itemInHand = Inventory.GetItemInHand();
 
-		/// <summary>
-		/// 
-		/// </summary>
-		/// <param name="message"></param>
+			var itemsPool = new List<Item>();
+			foreach (var trans in transaction.Transactions)
+			{
+				if (trans is ContainerTransactionRecord cont)
+				{
+					switch (cont.InventoryId)
+					{
+						case 0: // Container
+							/*Console.WriteLine("Container: ");
+							Console.WriteLine("Old item " + cont.OldItem);
+							Console.WriteLine("New item " + cont.NewItem);
+							Console.WriteLine("Slot " + cont.Slot);*/
+							if (cont.NewItem.Id == 0)
+							{
+								itemsPool.Add(cont.OldItem);
+								Inventory.Slots[cont.Slot] = cont.NewItem;
+							}
+							break;
+						case 124: // Cursor selected
+							/*Console.WriteLine("Cursor: ");
+							Console.WriteLine("Old item " + cont.OldItem);
+							Console.WriteLine("New item " + cont.NewItem);
+							Console.WriteLine("Slot " + cont.Slot);*/
+							if (cont.NewItem.Id == 0)
+							{
+								itemsPool.Add(cont.OldItem);
+								Inventory.Cursor = cont.NewItem;
+							}
+							break;
+						case 119: // Offhand
+							trans.Inventory = Inventory;
+							break;
+						case 120: // Armor
+							//Console.WriteLine("ARMOR " + cont.Slot);
+							trans.Inventory = Inventory;
+							break;
+						case -1: // None
+							trans.Inventory = Inventory;
+							break;
+					}
+				}
+				else if (trans is CreativeTransactionRecord creative)
+				{
+					if (GameMode != GameMode.Creative) return;
+
+					SendPlayerInventory();
+				}
+				SendPlayerInventory();
+
+			}
+
+			/*foreach(var p in itemsPool)
+			{
+				Console.WriteLine("Pool - " + p);
+			}*/
+			foreach (var trans in transaction.Transactions)
+			{
+				if (trans is ContainerTransactionRecord cont)
+				{
+					if(cont.NewItem.Id != 0)
+					{
+						var i = itemsPool.FirstOrDefault(l => CheckItemsClient(l, cont.NewItem));
+						if(i != null)
+						{
+							itemsPool.Remove(i);
+							switch (cont.InventoryId)
+							{
+								case 0: // Container
+									Inventory.Slots[cont.Slot] = i;
+									break;
+								case 124: // Cursor selected
+									Inventory.Cursor = i;
+									break;
+								case 119: // Offhand
+									Inventory.Offhand = i;
+									break;
+								case 120: // Armor
+									break;
+								case -1: // None
+									break;
+							}
+						}
+					}
+				}
+			}
+			SendPlayerInventory();
+		}
+
 		public void HandleMcpeInventoryTransaction(McpeInventoryTransaction message)
 		{
 			var transaction = message.transaction;
 			var itemInHand = Inventory.GetItemInHand();
 
-			//Console.WriteLine("Transaction: " + (McpeInventoryTransaction.TransactionTypes)transaction.TransactionType);
 			switch ((McpeInventoryTransaction.TransactionTypes)transaction.TransactionType)
 			{
 				case McpeInventoryTransaction.TransactionTypes.Normal:
-					Log.Warn("ActionType: " + transaction.ActionType);
-					Log.Warn("ClickPosition: " + transaction.ClickPosition);
-					Log.Warn("EntityId: " + transaction.EntityId);
-					Log.Warn("Item: " + transaction.Item);
-					Log.Warn("Slot: " + transaction.Slot);
-					foreach (var trs in transaction.Transactions)
-					{
-						Log.Warn("__");
-						Log.Warn("NewItem: " + trs.NewItem);
-						Log.Warn("OldItem: " + trs.OldItem);
-						Log.Warn("Slot: " + trs.Slot);
-					}
-					var tr = transaction.Transactions[0];
-					Inventory.Slots[tr.Slot] = tr.NewItem;
-					SendPlayerInventory();
+					ProcessNormalTransaction(message);
 					break;
 				case McpeInventoryTransaction.TransactionTypes.ItemUseOnEntity:
 					var target = Level.GetEntity(transaction.EntityId);
@@ -1936,7 +1983,7 @@ namespace MiNET
 		public virtual bool CheckItemsClient(Item serverSide, Item clientSide)
 		{
 			return serverSide.Id == clientSide.Id && serverSide.Metadata == serverSide.Metadata &&
-				serverSide.ExtraData.Equals(clientSide.ExtraData);
+				serverSide.Count == clientSide.Count && (serverSide.ExtraData?.Equals(clientSide.ExtraData) ?? clientSide.ExtraData == null);
 		}
 
 		/// <summary>

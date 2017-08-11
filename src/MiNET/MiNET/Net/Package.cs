@@ -886,6 +886,7 @@ namespace MiNET.Net
 				record.Slot = ReadVarInt();
 				record.OldItem = ReadItem();
 				record.NewItem = ReadItem();
+				record.SourceType = sourceType;
 				trans.Transactions.Add(record);
 			}
 
