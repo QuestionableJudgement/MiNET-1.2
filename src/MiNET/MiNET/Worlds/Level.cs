@@ -612,32 +612,33 @@ namespace MiNET.Worlds
 					}
 				}
 
-				//foreach (var entity in entities)
-				//{
-				//	if (entity.LastUpdatedTime >= lastSendTime)
-				//	{
-				//		{
-				//			McpeMoveEntity moveEntity = McpeMoveEntity.CreateObject();
-				//			moveEntity.entityId = entity.EntityId;
-				//			moveEntity.position = (PlayerLocation)entity.KnownPosition.Clone();
-				//			moveEntity.position.Y += entity.PositionOffset;
-				//			byte[] bytes = moveEntity.Encode();
-				//			BatchUtils.WriteLength(stream, bytes.Length);
-				//			stream.Write(bytes, 0, bytes.Length);
-				//			moveEntity.PutPool();
-				//		}
-				//		{
-				//			McpeSetEntityMotion entityMotion = McpeSetEntityMotion.CreateObject();
-				//			entityMotion.entityId = entity.EntityId;
-				//			entityMotion.velocity = entity.Velocity;
-				//			byte[] bytes = entityMotion.Encode();
-				//			BatchUtils.WriteLength(stream, bytes.Length);
-				//			stream.Write(bytes, 0, bytes.Length);
-				//			entityMotion.PutPool();
-				//		}
-				//		entiyMoveCount++;
-				//	}
-				//}
+				foreach (var entity in entities)
+				{
+					if (entity.LastUpdatedTime >= lastSendTime)
+					{
+						{
+							McpeMoveEntity moveEntity = McpeMoveEntity.CreateObject();
+							moveEntity.runtimeEntityId = entity.EntityId;
+							moveEntity.position = (PlayerLocation)entity.KnownPosition.Clone();
+							if(entity.PositionOffset != null)
+								moveEntity.position += entity.PositionOffset;
+							byte[] bytes = moveEntity.Encode();
+							BatchUtils.WriteLength(stream, bytes.Length);
+							stream.Write(bytes, 0, bytes.Length);
+							moveEntity.PutPool();
+						}
+						{
+							McpeSetEntityMotion entityMotion = McpeSetEntityMotion.CreateObject();
+							entityMotion.runtimeEntityId = entity.EntityId;
+							entityMotion.velocity = entity.Velocity;
+							byte[] bytes = entityMotion.Encode();
+							BatchUtils.WriteLength(stream, bytes.Length);
+							stream.Write(bytes, 0, bytes.Length);
+							entityMotion.PutPool();
+						}
+						entiyMoveCount++;
+					}
+				}
 
 				if (playerMoveCount == 0 && entiyMoveCount == 0) return;
 

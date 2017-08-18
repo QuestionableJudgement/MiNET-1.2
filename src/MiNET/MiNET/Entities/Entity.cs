@@ -48,8 +48,9 @@ namespace MiNET.Entities
 
 		public DateTime LastUpdatedTime { get; set; }
 		public PlayerLocation KnownPosition { get; set; }
+
 		public Vector3 Velocity { get; set; }
-		public float PositionOffset { get; set; }
+		public PlayerLocation PositionOffset { get; set; }
 
 		public HealthManager HealthManager { get; set; }
 

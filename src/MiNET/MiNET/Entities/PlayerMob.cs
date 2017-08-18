@@ -42,7 +42,7 @@ namespace MiNET.Entities
 			NoAi = true;
 			HealthManager.IsOnFire = false;
 			Velocity = Vector3.Zero;
-			PositionOffset = 1.62f;
+			PositionOffset = new PlayerLocation {Y = 1.62f};
 		}
 
 		public override MetadataDictionary GetMetadata()

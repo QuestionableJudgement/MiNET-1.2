@@ -93,6 +93,24 @@ namespace MiNET.Utils
 				b.Yaw,
 				b.Pitch);
 		}
+		
+		public static PlayerLocation operator +(PlayerLocation b, PlayerLocation a)
+		{
+			return new PlayerLocation(
+				a.X + b.X,
+				a.Y + b.Y,
+				a.Z + b.Z,
+				ToPositveAngle(a.HeadYaw + b.HeadYaw),
+				ToPositveAngle(a.Yaw + b.Yaw),
+				ToPositveAngle(a.Pitch + b.Pitch));
+		}
+		
+		private static float ToPositveAngle(float angle)
+		{
+			angle = angle % 360;
+			if (angle < 0) angle += 360;
+			return angle;
+		}
 
 		public static implicit operator Vector3(PlayerLocation a)
 		{

@@ -2,7 +2,7 @@
 
 namespace MiNET.UI.Elements
 {
-	public abstract class Button : IElement
+	public class Button : IElement
 	{
 		public string Text { get; set; }
 		public string Image { get; set; }
@@ -26,6 +26,9 @@ namespace MiNET.UI.Elements
 			return j;
 		}
 
-		public abstract void Process(Player player, object value);
+		public virtual void Process(Player player, object value)
+		{
+			
+		}
 	}
 }

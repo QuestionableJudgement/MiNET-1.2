@@ -56,7 +56,7 @@ namespace MiNET.UI.Forms
 			}
 			catch(Exception e)
 			{
-				Log.Error(e);
+//				Log.Error(e);
 			}
 		}
 	}

@@ -9,7 +9,7 @@ namespace MiNET.Entities.Behaviors
 	{
 		private static readonly ILog Log = LogManager.GetLogger(typeof (MobController));
 
-		private readonly Mob _entity;
+		protected readonly Mob _entity;
 
 		public MobController(Mob entity)
 		{
@@ -48,7 +48,7 @@ namespace MiNET.Entities.Behaviors
 			_entity.KnownPosition.Pitch = (float) pitch;
 		}
 
-		public void RotateTowards(Vector3 targetPosition)
+		public virtual void RotateTowards(Vector3 targetPosition)
 		{
 			Vector3 entityPosition = _entity.KnownPosition;
 			var d = Vector3.Normalize(targetPosition - entityPosition);
@@ -184,7 +184,7 @@ namespace MiNET.Entities.Behaviors
 		{
 		}
 
-		private double RadianToDegree(double angle)
+		protected double RadianToDegree(double angle)
 		{
 			return angle*(180.0/Math.PI);
 		}

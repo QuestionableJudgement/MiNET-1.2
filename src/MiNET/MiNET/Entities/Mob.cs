@@ -19,7 +19,7 @@ namespace MiNET.Entities
 
 		public List<IBehavior> Behaviors { get; } = new List<IBehavior>();
 		private IBehavior _currentBehavior = null;
-		public MobController Controller { get; private set; }
+		public MobController Controller { get; protected set; }
 
 		public double Direction { get; set; }
 		public double Speed { get; set; } = 0.25f;
@@ -27,6 +27,8 @@ namespace MiNET.Entities
 		public bool IsOnGround { get; set; }
 
 		public Entity Target { get; private set; }
+		
+		public Entity Owner { get; set; }
 
 		public Mob(int entityTypeId, Level level) : base(entityTypeId, level)
 		{
@@ -130,9 +132,7 @@ namespace MiNET.Entities
 			{
 				_lastSentPos = KnownPosition;
 				_lastSentRotation = KnownPosition.GetDirection();
-
-				BroadcastMove();
-				BroadcastMotion();
+				LastUpdatedTime = DateTime.UtcNow;
 			}
 
 			// Calculate velocity for next move

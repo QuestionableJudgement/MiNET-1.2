@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Numerics;
 using AStarNavigator;
@@ -12,11 +14,12 @@ namespace MiNET.Entities.Behaviors
 	{
 		private static readonly ILog Log = LogManager.GetLogger(typeof (TemptedBehavior));
 
-		private readonly Wolf _entity;
+		private readonly Mob _entity;
 		private readonly double _lookDistance;
 		private readonly double _speedMultiplier;
+		public double FollowDistance = 1.75d;
 
-		public FollowOwnerBehavior(Wolf entity, double lookDistance, double speedMultiplier)
+		public FollowOwnerBehavior(Mob entity, double lookDistance, double speedMultiplier)
 		{
 			_entity = entity;
 			_lookDistance = lookDistance;
@@ -45,11 +48,21 @@ namespace MiNET.Entities.Behaviors
 
 			var distanceToPlayer = _entity.KnownPosition.DistanceTo(player.KnownPosition);
 
-			if (distanceToPlayer < 1.75)
+			if (distanceToPlayer < FollowDistance)
 			{
 				// if within 6m stop following (walking)
 				_entity.Velocity = Vector3.Zero;
 				_entity.Controller.LookAt(player);
+				return;
+			}
+			else if(distanceToPlayer > 15)
+			{
+				_entity.Velocity = Vector3.Zero;
+				_currentPath = null;
+				
+				_entity.KnownPosition = player.KnownPosition;
+				_entity.LastUpdatedTime = DateTime.Now;
+				
 				return;
 			}
 
@@ -58,10 +71,6 @@ namespace MiNET.Entities.Behaviors
 				Log.Debug($"Search new solution");
 				var pathFinder = new PathFinder();
 				_currentPath = pathFinder.FindPath(_entity, player, distanceToPlayer + 1);
-				if (_currentPath.Count == 0)
-				{
-					_currentPath = pathFinder.FindPath(_entity, player, _lookDistance);
-				}
 			}
 
 			if (_currentPath.Count > 0)
@@ -99,9 +108,12 @@ namespace MiNET.Entities.Behaviors
 				Log.Debug($"Found no path solution");
 				_entity.Velocity = Vector3.Zero;
 				_currentPath = null;
+				
+				_entity.KnownPosition = player.KnownPosition;
+				_entity.LastUpdatedTime = DateTime.Now;
 			}
 
-			_entity.Controller.LookAt(player, true);
+			_entity.Controller.LookAt(player);
 		}
 
 		private bool GetNextTile(out Tile next)
