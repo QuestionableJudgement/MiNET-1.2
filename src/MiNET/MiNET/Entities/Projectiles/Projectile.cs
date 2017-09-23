@@ -177,7 +177,7 @@ namespace MiNET.Entities.Projectiles
 			}
 		}
 
-		private Entity CheckEntityCollide(Vector3 position, Vector3 direction)
+		protected virtual Entity CheckEntityCollide(Vector3 position, Vector3 direction)
 		{
 			Ray2 ray = new Ray2
 			{
